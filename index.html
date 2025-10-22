@@ -1,23 +1,23 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Vote — Pick One</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body class="bg-gray-50 min-h-screen flex flex-col items-center p-6">
-  <div class="max-w-3xl w-full">
-    <h1 class="text-3xl font-bold text-center mb-4">Vote for Your Favorite</h1>
-    <p class="text-center text-sm text-gray-600 mb-6">Click an image to cast your vote (one click = one vote).</p>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vote for Your Favorite</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body class="bg-gray-50 text-center p-4">
+    <h1 class="text-2xl font-bold mb-4">Vote for Your Favorite</h1>
+    <p class="text-gray-700 mb-6">
+      Click an image to cast your vote (one click = one vote).<br />
+      After voting, you’ll be taken to the results page where you can share.
+    </p>
 
-    <div id="image-grid" class="grid grid-cols-2 md:grid-cols-3 gap-4"></div>
+    <!-- ✅ This is where the images will appear -->
+    <div id="image-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 max-w-4xl mx-auto"></div>
 
-    <p class="text-center text-xs text-gray-500 mt-6">After voting you will be taken to the results page where you can share.</p>
-  </div>
-
-  <script type="module" src="firebase.js"></script>
-  <script type="module" src="script.js"></script>
-</body>
+    <!-- ✅ Make sure to include your JS files in the correct order -->
+    <script type="module" src="firebase.js"></script>
+    <script type="module" src="script.js"></script>
+  </body>
 </html>
