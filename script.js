@@ -6,12 +6,12 @@ import { db, dbRef, get, update, runTransaction } from "./firebase.js";
   Put your 6 image URLs here and change names as you wish.
 */
 const images = [
-  { id: "1", src: "https://imgur.com/enzBSYA", name: "Option 1" },
-  { id: "2", src: "https://imgur.com/KyJZtHX", name: "Option 2" },
-  { id: "3", src: "https://imgur.com/XLck5Jb", name: "Option 3" },
-  { id: "4", src: "https://imgur.com/4yCMosN", name: "Option 4" },
-  { id: "5", src: "https://imgur.com/bELcRVl", name: "Option 5" },
-  { id: "6", src: "https://imgur.com/7cjHmIJ", name: "Option 6" },
+  { id: "1", src: "https://imgur.com/enzBSYA.jpg", name: "Option 1" },
+  { id: "2", src: "https://imgur.com/KyJZtHX.jpg", name: "Option 2" },
+  { id: "3", src: "https://imgur.com/XLck5Jb.jpg", name: "Option 3" },
+  { id: "4", src: "https://imgur.com/4yCMosN.jpg", name: "Option 4" },
+  { id: "5", src: "https://imgur.com/bELcRVl.jpg", name: "Option 5" },
+  { id: "6", src: "https://imgur.com/7cjHmIJ.jpg", name: "Option 6" },
 ];
 
 // Helper shortcut to get element by ID
