@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Voting Results</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-white min-h-screen flex flex-col items-center p-6">
+  <div class="max-w-3xl w-full">
+    <h1 class="text-3xl font-bold text-center mb-4">Live Results</h1>
+    <div id="results" class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6"></div>
+
+    <div class="flex justify-center gap-3">
+      <button id="shareBtn" class="px-4 py-2 rounded bg-blue-600 text-white">Share Results</button>
+      <a id="shortLink" class="px-4 py-2 rounded bg-gray-200 text-gray-800" href="#" target="_blank">Open Link</a>
+    </div>
+
+    <p class="text-xs text-gray-500 mt-4 text-center">Share in Instagram comments or WhatsApp. Use "Share Results" for quick sharing where supported.</p>
+  </div>
+
+  <script type="module" src="firebase.js"></script>
+  <script type="module" src="script.js"></script>
+</body>
+</html>
