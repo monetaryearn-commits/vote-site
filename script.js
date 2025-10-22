@@ -2,59 +2,62 @@
 import { db, dbRef, get, update, runTransaction } from "./firebase.js";
 
 /*
-  Edit these six objects with your image URLs and display names.
-  Example: { id: "1", src: "https://i.imgur.com/abc.jpg", name: "Option A" }
+  👇 EDIT ONLY THIS PART 👇
+  Put your 6 image URLs here and change names as you wish.
 */
 const images = [
-  { id: "1", src: "YOUR_IMAGE_URL_1", name: "Option 1" },
-  { id: "2", src: "YOUR_IMAGE_URL_2", name: "Option 2" },
-  { id: "3", src: "YOUR_IMAGE_URL_3", name: "Option 3" },
-  { id: "4", src: "YOUR_IMAGE_URL_4", name: "Option 4" },
-  { id: "5", src: "YOUR_IMAGE_URL_5", name: "Option 5" },
-  { id: "6", src: "YOUR_IMAGE_URL_6", name: "Option 6" },
+  { id: "1", src: "https://imgur.com/enzBSYA", name: "Option 1" },
+  { id: "2", src: "https://imgur.com/KyJZtHX", name: "Option 2" },
+  { id: "3", src: "https://imgur.com/XLck5Jb", name: "Option 3" },
+  { id: "4", src: "https://imgur.com/4yCMosN", name: "Option 4" },
+  { id: "5", src: "https://imgur.com/bELcRVl", name: "Option 5" },
+  { id: "6", src: "https://imgur.com/7cjHmIJ", name: "Option 6" },
 ];
 
-// simple helper to get element by id
+// Helper shortcut to get element by ID
 const $ = (id) => document.getElementById(id);
 
-// --- Voting page: render images and handle clicks ---
+// --- Voting page (index.html) ---
 const imageGrid = $("image-grid");
 if (imageGrid) {
   images.forEach((img) => {
     const wrapper = document.createElement("div");
     wrapper.className = "relative";
 
+    // create clickable image
     const el = document.createElement("img");
     el.src = img.src;
     el.alt = img.name;
-    el.className = "vote-img cursor-pointer shadow-md transition-transform hover:scale-105";
+    el.className =
+      "vote-img cursor-pointer shadow-md transition-transform hover:scale-105";
+
+    // ✅ CLICK HANDLER — counts votes and prevents duplicates
     el.onclick = async () => {
-      // Prevent multiple quick clicks
+      // check if already voted
       if (localStorage.getItem("votedFor")) {
-        // user already voted on this browser
-        alert("You have already voted from this browser. You can still view results.");
+        alert("You have already voted from this device. You can view results now.");
         window.location.href = "results.html";
         return;
       }
 
       try {
+        // send +1 vote to Firebase
         const voteRef = dbRef(db, "votes/" + img.id + "/count");
+        await runTransaction(voteRef, (current) => (current || 0) + 1);
 
-        // Use a transaction to safely increment the count
-        await runTransaction(voteRef, (current) => {
-          return (current || 0) + 1;
-        });
-
+        // remember this device has voted
         localStorage.setItem("votedFor", img.id);
-        // store timestamp too
         localStorage.setItem("votedAt", Date.now());
+
+        // redirect to results page
         window.location.href = "results.html";
       } catch (err) {
         console.error("Vote error:", err);
-        alert("There was an error sending your vote. Try again later.");
+        alert("There was an error submitting your vote. Please try again.");
       }
     };
 
+    // image label
     const label = document.createElement("div");
     label.className = "text-sm text-center mt-2";
     label.textContent = img.name;
@@ -65,7 +68,7 @@ if (imageGrid) {
   });
 }
 
-// --- Results page: fetch and display percentages ---
+// --- Results page (results.html) ---
 const resultsDiv = $("results");
 if (resultsDiv) {
   const fetchResults = async () => {
@@ -73,14 +76,14 @@ if (resultsDiv) {
       const snapshot = await get(dbRef(db, "votes"));
       const data = snapshot.val() || {};
 
-      // Ensure every image has a numeric count (0 if missing)
-      const counts = images.map((img) => {
-        return { id: img.id, name: img.name, src: img.src, count: (data[img.id]?.count || 0) };
-      });
+      const counts = images.map((img) => ({
+        id: img.id,
+        name: img.name,
+        src: img.src,
+        count: data[img.id]?.count || 0,
+      }));
 
       const total = counts.reduce((s, c) => s + c.count, 0);
-
-      // Clear existing
       resultsDiv.innerHTML = "";
 
       counts.forEach((c) => {
@@ -88,31 +91,36 @@ if (resultsDiv) {
         const card = document.createElement("div");
         card.className = "p-2";
 
+        // Highlight the image user voted for
+        const votedId = localStorage.getItem("votedFor");
+        const border = votedId === c.id ? "border-4 border-green-500" : "border";
+
         card.innerHTML = `
-          <img src="${c.src}" class="result-img shadow mb-2" />
+          <img src="${c.src}" class="result-img shadow mb-2 ${border}" />
           <div class="font-semibold text-sm">${c.name}</div>
           <div class="text-xs text-gray-600">${c.count} votes • ${percent}%</div>
-          <div class="w-full bg-gray-200 rounded-full h-2 mt-2 overflow-hidden"><div style="width:${percent}%;" class="h-full bg-gradient-to-r from-green-400 to-blue-500"></div></div>
+          <div class="w-full bg-gray-200 rounded-full h-2 mt-2 overflow-hidden">
+            <div style="width:${percent}%;" class="h-full bg-gradient-to-r from-green-400 to-blue-500"></div>
+          </div>
         `;
         resultsDiv.appendChild(card);
       });
 
-      // Update short link text
+      // update share link
       const shortLink = document.getElementById("shortLink");
       if (shortLink) {
-        shortLink.href = window.location.origin + window.location.pathname.replace("results.html", "results.html");
+        shortLink.href = window.location.origin;
         shortLink.textContent = window.location.origin;
       }
     } catch (err) {
       console.error("Get results error:", err);
-      resultsDiv.innerHTML = "<div class='text-red-500'>Error loading results.</div>";
+      resultsDiv.innerHTML =
+        "<div class='text-red-500'>Error loading results. Please refresh.</div>";
     }
   };
 
-  // initial fetch
+  // load data initially and refresh every 6 seconds
   fetchResults();
-
-  // refresh every 6 seconds for near-real-time updates
   setInterval(fetchResults, 6000);
 
   // share button
@@ -121,20 +129,19 @@ if (resultsDiv) {
     shareBtn.onclick = async () => {
       const shareData = {
         title: "Live Voting Results",
-        text: "See live voting results — vote now!",
-        url: window.location.origin
+        text: "Check out the live voting results and cast your vote!",
+        url: window.location.origin,
       };
       try {
         if (navigator.share) {
           await navigator.share(shareData);
         } else {
-          // fallback: copy to clipboard
           await navigator.clipboard.writeText(shareData.url);
-          alert("Link copied to clipboard. Paste it into Instagram / WhatsApp.");
+          alert("Link copied to clipboard! You can paste it on Instagram or WhatsApp.");
         }
       } catch (err) {
         console.error("Share error:", err);
-        alert("Could not share. Copy the link shown instead.");
+        alert("Could not share. Copy the link manually.");
       }
     };
   }
