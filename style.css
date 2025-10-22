@@ -1,0 +1,3 @@
+/* style.css — small tweaks */
+img.vote-img { width:100%; height:180px; object-fit:cover; border-radius:10px; }
+.result-img { width:100%; height:140px; object-fit:cover; border-radius:10px; }
