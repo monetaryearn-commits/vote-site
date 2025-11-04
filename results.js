@@ -50,45 +50,45 @@ async function loadResults() {
 
 loadResults();
 
-// --- SHARE RESULTS BUTTON ---
-const shareBtn = document.getElementById("shareBtn");
-if (shareBtn) {
-  shareBtn.onclick = async () => {
-    const link = window.location.origin;
-    const shareText = `📊 Check out live voting results and vote for your favorite party! 👉 ${link}`;
+document.addEventListener("DOMContentLoaded", () => {
+  const shareBtn = document.getElementById("shareBtn");
+  const copyBtn = document.getElementById("copyBtn");
 
-    try {
-      if (navigator.share) {
-        // Works on mobile browsers and HTTPS desktop browsers
-        await navigator.share({
-          title: "Live Voting Results",
-          text: shareText,
-          url: link,
-        });
-      } else {
-        // Fallback: prompt user to copy link manually
-        alert("Sharing is not supported on this browser. The link will be copied instead.");
-        await navigator.clipboard.writeText(link);
-        alert("Link copied! Share it on WhatsApp, Instagram, or anywhere.");
+  // --- SHARE RESULTS BUTTON ---
+  if (shareBtn) {
+    shareBtn.onclick = async () => {
+      const link = window.location.origin;
+      const shareText = `📊 Check out live voting results and vote for your favorite party! 👉 ${link}`;
+
+      try {
+        if (navigator.share) {
+          await navigator.share({
+            title: "Live Voting Results",
+            text: shareText,
+            url: link,
+          });
+        } else {
+          await navigator.clipboard.writeText(link);
+          alert("Sharing not supported. Link copied: " + link);
+        }
+      } catch (err) {
+        console.error("Share failed:", err);
+        alert("Sharing failed. Copy this link manually: " + link);
       }
-    } catch (err) {
-      console.error("Share failed:", err);
-      alert("Sharing failed. You can copy and share the link manually.");
-    }
-  };
-}
+    };
+  }
 
-// --- COPY / OPEN LINK BUTTON ---
-const copyBtn = document.getElementById("copyBtn");
-if (copyBtn) {
-  copyBtn.onclick = async () => {
-    const link = window.location.origin;
-    try {
-      await navigator.clipboard.writeText(link);
-      alert("✅ Link copied! You can now paste it into WhatsApp, Instagram, or any social media.");
-    } catch (err) {
-      console.error("Copy failed:", err);
-      alert("Copy failed. Please copy manually: " + link);
-    }
-  };
-}
+  // --- COPY / OPEN LINK BUTTON ---
+  if (copyBtn) {
+    copyBtn.onclick = async () => {
+      const link = window.location.origin;
+      try {
+        await navigator.clipboard.writeText(link);
+        alert("✅ Link copied! You can now share it anywhere.");
+      } catch (err) {
+        console.error("Copy failed:", err);
+        alert("Copy failed. Please copy manually: " + link);
+      }
+    };
+  }
+});
