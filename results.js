@@ -13,57 +13,82 @@ const images = [
 const resultsGrid = document.getElementById("results-grid");
 
 async function loadResults() {
-  const snapshot = await get(dbRef(db, "votes"));
-  const data = snapshot.val() || {};
+  try {
+    const snapshot = await get(dbRef(db, "votes"));
+    const data = snapshot.val() || {};
 
-  // Calculate totals
-  let total = 0;
-  images.forEach((img) => {
-    total += data[img.id]?.count || 0;
-  });
+    // Calculate totals
+    let total = 0;
+    images.forEach((img) => {
+      total += data[img.id]?.count || 0;
+    });
 
-  // Display each result
-  images.forEach((img) => {
-    const count = data[img.id]?.count || 0;
-    const percent = total > 0 ? ((count / total) * 100).toFixed(1) : 0;
+    // Display each result
+    images.forEach((img) => {
+      const count = data[img.id]?.count || 0;
+      const percent = total > 0 ? ((count / total) * 100).toFixed(1) : 0;
 
-    const wrapper = document.createElement("div");
-    wrapper.className = "result-item";
+      const wrapper = document.createElement("div");
+      wrapper.className = "result-item";
 
-    wrapper.innerHTML = `
-      <img src="${img.src}" alt="${img.name}" class="result-img">
-      <div class="result-info">
-        <strong>${img.name}</strong>
-        <div class="bar">
-          <div class="fill" style="width:${percent}%"></div>
+      wrapper.innerHTML = `
+        <img src="${img.src}" alt="${img.name}" class="result-img">
+        <div class="result-info">
+          <strong>${img.name}</strong>
+          <div class="bar">
+            <div class="fill" style="width:${percent}%"></div>
+          </div>
+          <p>${count} votes (${percent}%)</p>
         </div>
-        <p>${count} votes (${percent}%)</p>
-      </div>
-    `;
-    resultsGrid.appendChild(wrapper);
-  });
+      `;
+      resultsGrid.appendChild(wrapper);
+    });
+  } catch (error) {
+    console.error("Error loading results:", error);
+  }
 }
 
 loadResults();
 
-// --- SHARE BUTTON ---
-document.getElementById("shareBtn").onclick = async () => {
-  const shareText = `🔥 Vote for your favorite party in Tamil Nadu! Live results here 👉 ${window.location.origin}`;
-  
-  if (navigator.share) {
-    await navigator.share({
-      title: "Voting Results",
-      text: shareText,
-      url: window.location.origin,
-    });
-  } else {
-    alert("Sharing not supported on this device. You can copy the link instead.");
-  }
-};
+// --- SHARE RESULTS BUTTON ---
+const shareBtn = document.getElementById("shareBtn");
+if (shareBtn) {
+  shareBtn.onclick = async () => {
+    const link = window.location.origin;
+    const shareText = `📊 Check out live voting results and vote for your favorite party! 👉 ${link}`;
 
-// --- COPY LINK BUTTON ---
-document.getElementById("copyBtn").onclick = async () => {
-  const link = window.location.origin;
-  await navigator.clipboard.writeText(link);
-  alert("Link copied! You can now share it on WhatsApp, Instagram, or anywhere.");
-};
+    try {
+      if (navigator.share) {
+        // Works on mobile browsers and HTTPS desktop browsers
+        await navigator.share({
+          title: "Live Voting Results",
+          text: shareText,
+          url: link,
+        });
+      } else {
+        // Fallback: prompt user to copy link manually
+        alert("Sharing is not supported on this browser. The link will be copied instead.");
+        await navigator.clipboard.writeText(link);
+        alert("Link copied! Share it on WhatsApp, Instagram, or anywhere.");
+      }
+    } catch (err) {
+      console.error("Share failed:", err);
+      alert("Sharing failed. You can copy and share the link manually.");
+    }
+  };
+}
+
+// --- COPY / OPEN LINK BUTTON ---
+const copyBtn = document.getElementById("copyBtn");
+if (copyBtn) {
+  copyBtn.onclick = async () => {
+    const link = window.location.origin;
+    try {
+      await navigator.clipboard.writeText(link);
+      alert("✅ Link copied! You can now paste it into WhatsApp, Instagram, or any social media.");
+    } catch (err) {
+      console.error("Copy failed:", err);
+      alert("Copy failed. Please copy manually: " + link);
+    }
+  };
+}
