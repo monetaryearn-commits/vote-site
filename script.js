@@ -1,6 +1,7 @@
 // script.js
 import { db, dbRef, runTransaction } from "./firebase.js";
 
+// 👇 Your voting options and images
 const images = [
   { id: "1", src: "https://i.imgur.com/KyJZtHX.jpg", name: "TVK" },
   { id: "2", src: "https://i.imgur.com/enzBSYA.jpg", name: "DMK" },
@@ -13,7 +14,7 @@ const images = [
 const imageGrid = document.getElementById("image-grid");
 const voted = localStorage.getItem("votedFor");
 
-// Show images
+// Display each image with label
 images.forEach((img) => {
   const wrapper = document.createElement("div");
   wrapper.className = "relative";
@@ -28,7 +29,7 @@ images.forEach((img) => {
   label.className = "text-sm text-center mt-2 font-semibold";
   label.textContent = img.name;
 
-  // ✅ Voting click handler
+  // ✅ Voting click action
   el.onclick = async () => {
     if (voted) {
       alert("You already voted for: " + voted);
