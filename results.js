@@ -10,20 +10,21 @@ const images = [
   { id: "6", src: "https://i.imgur.com/7cjHmIJ.jpg", name: "DMDK" },
 ];
 
-const resultsGrid = document.getElementById("results-grid");
+document.addEventListener("DOMContentLoaded", async () => {
+  const resultsGrid = document.getElementById("results-grid");
+  const shareBtn = document.getElementById("shareBtn");
+  const copyBtn = document.getElementById("copyBtn");
 
-async function loadResults() {
+  // --- Load results from Firebase ---
   try {
     const snapshot = await get(dbRef(db, "votes"));
     const data = snapshot.val() || {};
-
-    // Calculate totals
     let total = 0;
+
     images.forEach((img) => {
       total += data[img.id]?.count || 0;
     });
 
-    // Display each result
     images.forEach((img) => {
       const count = data[img.id]?.count || 0;
       const percent = total > 0 ? ((count / total) * 100).toFixed(1) : 0;
@@ -35,60 +36,52 @@ async function loadResults() {
         <img src="${img.src}" alt="${img.name}" class="result-img">
         <div class="result-info">
           <strong>${img.name}</strong>
-          <div class="bar">
-            <div class="fill" style="width:${percent}%"></div>
-          </div>
+          <div class="bar"><div class="fill" style="width:${percent}%"></div></div>
           <p>${count} votes (${percent}%)</p>
         </div>
       `;
       resultsGrid.appendChild(wrapper);
     });
-  } catch (error) {
-    console.error("Error loading results:", error);
+  } catch (err) {
+    console.error("Error loading results:", err);
   }
-}
-
-loadResults();
-
-document.addEventListener("DOMContentLoaded", () => {
-  const shareBtn = document.getElementById("shareBtn");
-  const copyBtn = document.getElementById("copyBtn");
 
   // --- SHARE RESULTS BUTTON ---
   if (shareBtn) {
-    shareBtn.onclick = async () => {
+    shareBtn.addEventListener("click", async () => {
       const link = window.location.origin;
-      const shareText = `📊 Check out live voting results and vote for your favorite party! 👉 ${link}`;
+      const text = `📊 Check out live voting results and vote for your favorite party! ${link}`;
 
       try {
+        // Mobile and compatible browsers
         if (navigator.share) {
           await navigator.share({
-            title: "Live Voting Results",
-            text: shareText,
+            title: "Voting Results",
+            text,
             url: link,
           });
         } else {
-          await navigator.clipboard.writeText(link);
-          alert("Sharing not supported. Link copied: " + link);
+          // Desktop fallback
+          prompt("Copy this link to share:", link);
         }
       } catch (err) {
         console.error("Share failed:", err);
-        alert("Sharing failed. Copy this link manually: " + link);
+        alert("Sharing failed. Please copy the link manually: " + link);
       }
-    };
+    });
   }
 
   // --- COPY / OPEN LINK BUTTON ---
   if (copyBtn) {
-    copyBtn.onclick = async () => {
+    copyBtn.addEventListener("click", async () => {
       const link = window.location.origin;
       try {
         await navigator.clipboard.writeText(link);
-        alert("✅ Link copied! You can now share it anywhere.");
+        alert("✅ Link copied! You can paste it anywhere to share.");
       } catch (err) {
         console.error("Copy failed:", err);
-        alert("Copy failed. Please copy manually: " + link);
+        prompt("Copy this link manually:", link);
       }
-    };
+    });
   }
 });
