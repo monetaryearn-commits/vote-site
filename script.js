@@ -1,5 +1,5 @@
 // script.js
-import { db, dbRef, get, update, runTransaction } from "./firebase.js";
+import { db, dbRef, get, runTransaction } from "./firebase.js";
 
 /*
   👇 EDIT ONLY THIS PART 👇
