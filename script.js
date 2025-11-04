@@ -1,9 +1,6 @@
 // script.js
 import { db, dbRef, runTransaction } from "./firebase.js";
 
-import { db, dbRef, runTransaction } from "./firebase.js";
-runTransaction(dbRef(db, "test/count"), (c) => (c || 0) + 1);
-
 // 👇 Your voting options and images
 const images = [
   { id: "1", src: "https://i.imgur.com/KyJZtHX.jpg", name: "TVK" },
