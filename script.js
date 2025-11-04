@@ -1,8 +1,8 @@
 // script.js
 import { db, dbRef, runTransaction } from "./firebase.js";
 
-import { db } from "./firebase.js";
-console.log("Firebase connected:", db);
+import { db, dbRef, runTransaction } from "./firebase.js";
+runTransaction(dbRef(db, "test/count"), (c) => (c || 0) + 1);
 
 // 👇 Your voting options and images
 const images = [
