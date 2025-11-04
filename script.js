@@ -2,12 +2,12 @@
 import { db, dbRef, runTransaction } from "./firebase.js";
 
 const images = [
-  { id: "1", src: "https://i.imgur.com/KyJZtHX.jpg", name: "Option 1" },
-  { id: "2", src: "https://i.imgur.com/enzBSYA.jpg", name: "Option 2" },
-  { id: "3", src: "https://i.imgur.com/XLck5Jb.jpg", name: "Option 3" },
-  { id: "4", src: "https://i.imgur.com/4yCMosN.jpg", name: "Option 4" },
-  { id: "5", src: "https://i.imgur.com/bELcRVl.jpg", name: "Option 5" },
-  { id: "6", src: "https://i.imgur.com/7cjHmIJ.jpg", name: "Option 6" },
+  { id: "1", src: "https://i.imgur.com/KyJZtHX.jpg", name: "TVK" },
+  { id: "2", src: "https://i.imgur.com/enzBSYA.jpg", name: "DMK" },
+  { id: "3", src: "https://i.imgur.com/XLck5Jb.jpg", name: "ADMK" },
+  { id: "4", src: "https://i.imgur.com/4yCMosN.jpg", name: "BJP" },
+  { id: "5", src: "https://i.imgur.com/bELcRVl.jpg", name: "NTK" },
+  { id: "6", src: "https://i.imgur.com/7cjHmIJ.jpg", name: "DMDK" },
 ];
 
 const imageGrid = document.getElementById("image-grid");
