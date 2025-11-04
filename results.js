@@ -15,44 +15,42 @@ document.addEventListener("DOMContentLoaded", async () => {
   const shareBtn = document.getElementById("shareBtn");
   const copyBtn = document.getElementById("copyBtn");
 
-  // Load and render results immediately
   await loadResults(resultsGrid);
 
-  // --- SHARE RESULTS BUTTON ---
+  // --- SHARE RESULTS ---
   if (shareBtn) {
     shareBtn.addEventListener("click", async () => {
       const data = await fetchResults();
       const total = Object.values(data).reduce((sum, obj) => sum + (obj.count || 0), 0);
 
-      // Create popup
       const popup = document.createElement("div");
       popup.className = "popup-overlay";
       popup.innerHTML = `
         <div class="popup">
           <h2>📊 Live Voting Results</h2>
-          ${images.map((img) => {
-            const count = data[img.id]?.count || 0;
-            const percent = total > 0 ? ((count / total) * 100).toFixed(1) : 0;
-            return `
-              <div class="popup-row">
-                <span><b>${img.name}</b></span>
-                <div class="popup-bar">
-                  <div class="popup-fill" style="width:${percent}%"></div>
+          ${images
+            .map((img) => {
+              const count = data[img.id]?.count || 0;
+              const percent = total > 0 ? ((count / total) * 100).toFixed(1) : 0;
+              return `
+                <div class="popup-row">
+                  <span><b>${img.name}</b></span>
+                  <div class="popup-bar">
+                    <div class="popup-fill" style="width:${percent}%"></div>
+                  </div>
+                  <small>${count} votes (${percent}%)</small>
                 </div>
-                <small>${count} votes (${percent}%)</small>
-              </div>
-            `;
-          }).join("")}
+              `;
+            })
+            .join("")}
           <button id="popupClose">Close</button>
           <button id="popupShare">Share Results</button>
         </div>
       `;
       document.body.appendChild(popup);
 
-      // Close popup
       document.getElementById("popupClose").onclick = () => popup.remove();
 
-      // Share link
       document.getElementById("popupShare").onclick = async () => {
         const link = window.location.origin;
         const shareText = `📊 Live voting results — see who’s leading! Vote here 👉 ${link}`;
@@ -61,7 +59,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             await navigator.share({ title: "Voting Results", text: shareText, url: link });
           } else {
             await navigator.clipboard.writeText(link);
-            alert("✅ Link copied! Share it on WhatsApp, Instagram, or anywhere.");
+            showToast("✅ Link copied! Share it anywhere.");
           }
         } catch (err) {
           console.error("Share failed:", err);
@@ -76,7 +74,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const link = window.location.origin;
       try {
         await navigator.clipboard.writeText(link);
-        alert(`✅ Link copied! Share it anywhere:\n${link}`);
+        showToast("✅ Link copied!");
       } catch {
         prompt("Copy this link manually:", link);
       }
@@ -84,7 +82,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 });
 
-// 🔹 Load results into main page
+// --- Load results ---
 async function loadResults(resultsGrid) {
   const data = await fetchResults();
   let total = 0;
@@ -108,8 +106,20 @@ async function loadResults(resultsGrid) {
   });
 }
 
-// 🔹 Helper to get Firebase data
 async function fetchResults() {
   const snapshot = await get(dbRef(db, "votes"));
   return snapshot.val() || {};
+}
+
+// --- Toast Notification Function ---
+function showToast(message) {
+  const toast = document.createElement("div");
+  toast.className = "toast-message";
+  toast.textContent = message;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.classList.add("show"), 10);
+  setTimeout(() => {
+    toast.classList.remove("show");
+    setTimeout(() => toast.remove(), 500);
+  }, 2500);
 }
