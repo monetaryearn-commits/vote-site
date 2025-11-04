@@ -15,56 +15,58 @@ document.addEventListener("DOMContentLoaded", async () => {
   const shareBtn = document.getElementById("shareBtn");
   const copyBtn = document.getElementById("copyBtn");
 
-  // --- Load results from Firebase ---
-  try {
-    const snapshot = await get(dbRef(db, "votes"));
-    const data = snapshot.val() || {};
-    let total = 0;
-
-    images.forEach((img) => {
-      total += data[img.id]?.count || 0;
-    });
-
-    images.forEach((img) => {
-      const count = data[img.id]?.count || 0;
-      const percent = total > 0 ? ((count / total) * 100).toFixed(1) : 0;
-
-      const wrapper = document.createElement("div");
-      wrapper.className = "result-item";
-
-      wrapper.innerHTML = `
-        <img src="${img.src}" alt="${img.name}" class="result-img">
-        <div class="result-info">
-          <strong>${img.name}</strong>
-          <div class="bar"><div class="fill" style="width:${percent}%"></div></div>
-          <p>${count} votes (${percent}%)</p>
-        </div>
-      `;
-      resultsGrid.appendChild(wrapper);
-    });
-  } catch (err) {
-    console.error("Error loading results:", err);
-  }
+  // Load and render results immediately
+  await loadResults(resultsGrid);
 
   // --- SHARE RESULTS BUTTON ---
   if (shareBtn) {
     shareBtn.addEventListener("click", async () => {
-      const link = window.location.origin;
-      const text = `📊 Check out live voting results and vote for your favorite party! ${link}`;
-      try {
-        if (navigator.share) {
-          await navigator.share({
-            title: "Voting Results",
-            text,
-            url: link,
-          });
-        } else {
-          prompt("Copy this link to share:", link);
+      const data = await fetchResults();
+      const total = Object.values(data).reduce((sum, obj) => sum + (obj.count || 0), 0);
+
+      // Create popup
+      const popup = document.createElement("div");
+      popup.className = "popup-overlay";
+      popup.innerHTML = `
+        <div class="popup">
+          <h2>📊 Live Voting Results</h2>
+          ${images.map((img) => {
+            const count = data[img.id]?.count || 0;
+            const percent = total > 0 ? ((count / total) * 100).toFixed(1) : 0;
+            return `
+              <div class="popup-row">
+                <span><b>${img.name}</b></span>
+                <div class="popup-bar">
+                  <div class="popup-fill" style="width:${percent}%"></div>
+                </div>
+                <small>${count} votes (${percent}%)</small>
+              </div>
+            `;
+          }).join("")}
+          <button id="popupClose">Close</button>
+          <button id="popupShare">Share Results</button>
+        </div>
+      `;
+      document.body.appendChild(popup);
+
+      // Close popup
+      document.getElementById("popupClose").onclick = () => popup.remove();
+
+      // Share link
+      document.getElementById("popupShare").onclick = async () => {
+        const link = window.location.origin;
+        const shareText = `📊 Live voting results — see who’s leading! Vote here 👉 ${link}`;
+        try {
+          if (navigator.share) {
+            await navigator.share({ title: "Voting Results", text: shareText, url: link });
+          } else {
+            await navigator.clipboard.writeText(link);
+            alert("✅ Link copied! Share it on WhatsApp, Instagram, or anywhere.");
+          }
+        } catch (err) {
+          console.error("Share failed:", err);
         }
-      } catch (err) {
-        console.error("Share failed:", err);
-        prompt("Sharing failed. Copy this link manually:", link);
-      }
+      };
     });
   }
 
@@ -72,25 +74,42 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (copyBtn) {
     copyBtn.addEventListener("click", async () => {
       const link = window.location.origin;
-
-      // Try clipboard API first
       try {
         await navigator.clipboard.writeText(link);
-        alert(`✅ Link copied! You can now paste it anywhere: ${link}`);
-      } catch (err) {
-        console.warn("Clipboard API failed, showing fallback input:", err);
-
-        // Fallback: create temporary input box for manual copy
-        const input = document.createElement("input");
-        input.value = link;
-        document.body.appendChild(input);
-        input.select();
-        input.setSelectionRange(0, 99999); // for mobile
-        document.execCommand("copy");
-        document.body.removeChild(input);
-
-        alert(`✅ Link copied via fallback! You can also copy manually: ${link}`);
+        alert(`✅ Link copied! Share it anywhere:\n${link}`);
+      } catch {
+        prompt("Copy this link manually:", link);
       }
     });
   }
 });
+
+// 🔹 Load results into main page
+async function loadResults(resultsGrid) {
+  const data = await fetchResults();
+  let total = 0;
+  Object.values(data).forEach((obj) => (total += obj.count || 0));
+
+  images.forEach((img) => {
+    const count = data[img.id]?.count || 0;
+    const percent = total > 0 ? ((count / total) * 100).toFixed(1) : 0;
+
+    const wrapper = document.createElement("div");
+    wrapper.className = "result-item";
+    wrapper.innerHTML = `
+      <img src="${img.src}" alt="${img.name}" class="result-img">
+      <div class="result-info">
+        <strong>${img.name}</strong>
+        <div class="bar"><div class="fill" style="width:${percent}%"></div></div>
+        <p>${count} votes (${percent}%)</p>
+      </div>
+    `;
+    resultsGrid.appendChild(wrapper);
+  });
+}
+
+// 🔹 Helper to get Firebase data
+async function fetchResults() {
+  const snapshot = await get(dbRef(db, "votes"));
+  return snapshot.val() || {};
+}
