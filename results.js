@@ -48,7 +48,7 @@ loadResults();
 
 // --- SHARE BUTTON ---
 document.getElementById("shareBtn").onclick = async () => {
-  const shareText = `📊 Live voting results are out! See who’s leading and vote now!\n👉 ${window.location.origin}`;
+  const shareText = `🔥 Vote for your favorite party in Tamil Nadu! Live results here 👉 ${window.location.origin}`;
   
   if (navigator.share) {
     await navigator.share({
