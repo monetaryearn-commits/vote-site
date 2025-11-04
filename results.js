@@ -51,9 +51,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     shareBtn.addEventListener("click", async () => {
       const link = window.location.origin;
       const text = `📊 Check out live voting results and vote for your favorite party! ${link}`;
-
       try {
-        // Mobile and compatible browsers
         if (navigator.share) {
           await navigator.share({
             title: "Voting Results",
@@ -61,26 +59,37 @@ document.addEventListener("DOMContentLoaded", async () => {
             url: link,
           });
         } else {
-          // Desktop fallback
           prompt("Copy this link to share:", link);
         }
       } catch (err) {
         console.error("Share failed:", err);
-        alert("Sharing failed. Please copy the link manually: " + link);
+        prompt("Sharing failed. Copy this link manually:", link);
       }
     });
   }
 
-  // --- COPY / OPEN LINK BUTTON ---
+  // --- OPEN LINK BUTTON ---
   if (copyBtn) {
     copyBtn.addEventListener("click", async () => {
       const link = window.location.origin;
+
+      // Try clipboard API first
       try {
         await navigator.clipboard.writeText(link);
-        alert("✅ Link copied! You can paste it anywhere to share.");
+        alert(`✅ Link copied! You can now paste it anywhere: ${link}`);
       } catch (err) {
-        console.error("Copy failed:", err);
-        prompt("Copy this link manually:", link);
+        console.warn("Clipboard API failed, showing fallback input:", err);
+
+        // Fallback: create temporary input box for manual copy
+        const input = document.createElement("input");
+        input.value = link;
+        document.body.appendChild(input);
+        input.select();
+        input.setSelectionRange(0, 99999); // for mobile
+        document.execCommand("copy");
+        document.body.removeChild(input);
+
+        alert(`✅ Link copied via fallback! You can also copy manually: ${link}`);
       }
     });
   }
