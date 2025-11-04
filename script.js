@@ -1,6 +1,9 @@
 // script.js
 import { db, dbRef, runTransaction } from "./firebase.js";
 
+import { db } from "./firebase.js";
+console.log("Firebase connected:", db);
+
 // 👇 Your voting options and images
 const images = [
   { id: "1", src: "https://i.imgur.com/KyJZtHX.jpg", name: "TVK" },
