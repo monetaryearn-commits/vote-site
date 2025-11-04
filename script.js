@@ -1,72 +1,52 @@
 // script.js
-import { db, dbRef, get, runTransaction } from "./firebase.js";
+import { db, dbRef, runTransaction } from "./firebase.js";
 
-/*
-  👇 EDIT ONLY THIS PART 👇
-  Put your 6 image URLs here and change names as you wish.
-*/
 const images = [
-  { id: "1", src: "https://imgur.com/enzBSYA.jpg", name: "Option 1" },
-  { id: "2", src: "https://imgur.com/KyJZtHX.jpg", name: "Option 2" },
-  { id: "3", src: "https://imgur.com/XLck5Jb.jpg", name: "Option 3" },
-  { id: "4", src: "https://imgur.com/4yCMosN.jpg", name: "Option 4" },
-  { id: "5", src: "https://imgur.com/bELcRVl.jpg", name: "Option 5" },
-  { id: "6", src: "https://imgur.com/7cjHmIJ.jpg", name: "Option 6" },
+  { id: "1", src: "https://i.imgur.com/KyJZtHX.jpg", name: "Option 1" },
+  { id: "2", src: "https://i.imgur.com/enzBSYA.jpg", name: "Option 2" },
+  { id: "3", src: "https://i.imgur.com/XLck5Jb.jpg", name: "Option 3" },
+  { id: "4", src: "https://i.imgur.com/4yCMosN.jpg", name: "Option 4" },
+  { id: "5", src: "https://i.imgur.com/bELcRVl.jpg", name: "Option 5" },
+  { id: "6", src: "https://i.imgur.com/7cjHmIJ.jpg", name: "Option 6" },
 ];
 
-// Helper shortcut to get element by ID
-const $ = (id) => document.getElementById(id);
+const imageGrid = document.getElementById("image-grid");
+const voted = localStorage.getItem("votedFor");
 
-// --- Voting page (index.html) ---
-const imageGrid = $("image-grid");
-if (imageGrid) {
-  images.forEach((img) => {
-    const wrapper = document.createElement("div");
-    wrapper.className = "relative";
+// Show images
+images.forEach((img) => {
+  const wrapper = document.createElement("div");
+  wrapper.className = "relative";
 
-    // create clickable image
-    const el = document.createElement("img");
-    el.src = img.src;
-    el.alt = img.name;
-    el.className =
-      "vote-img cursor-pointer shadow-md transition-transform hover:scale-105";
+  const el = document.createElement("img");
+  el.src = img.src;
+  el.alt = img.name;
+  el.className =
+    "w-full rounded-lg shadow-md cursor-pointer transition-transform hover:scale-105";
 
-    // ✅ CLICK HANDLER — counts votes and prevents duplicates
-    el.onclick = async () => {
-      // check if already voted
-      if (localStorage.getItem("votedFor")) {
-        alert("You have already voted from this device. You can view results now.");
-        window.location.href = "results.html";
-        return;
-      }
+  const label = document.createElement("div");
+  label.className = "text-sm text-center mt-2 font-semibold";
+  label.textContent = img.name;
 
-      try {
-        // send +1 vote to Firebase
-        const voteRef = dbRef(db, "votes/" + img.id + "/count");
-        await runTransaction(voteRef, (current) => (current || 0) + 1);
+  // ✅ Voting click handler
+  el.onclick = async () => {
+    if (voted) {
+      alert("You already voted for: " + voted);
+      window.location.href = "results.html";
+      return;
+    }
 
-        // remember this device has voted
-        localStorage.setItem("votedFor", img.id);
-        localStorage.setItem("votedAt", Date.now());
+    const voteRef = dbRef(db, "votes/" + img.id + "/count");
+    await runTransaction(voteRef, (current) => (current || 0) + 1);
 
-        // redirect to results page
-        window.location.href = "results.html";
-      } catch (err) {
-        console.error("Vote error:", err);
-        alert("There was an error submitting your vote. Please try again.");
-      }
-    };
+    localStorage.setItem("votedFor", img.name);
+    window.location.href = "results.html";
+  };
 
-    // image label
-    const label = document.createElement("div");
-    label.className = "text-sm text-center mt-2";
-    label.textContent = img.name;
-
-    wrapper.appendChild(el);
-    wrapper.appendChild(label);
-    imageGrid.appendChild(wrapper);
-  });
-}
+  wrapper.appendChild(el);
+  wrapper.appendChild(label);
+  imageGrid.appendChild(wrapper);
+});
 
 // --- Results page (results.html) ---
 const resultsDiv = $("results");
