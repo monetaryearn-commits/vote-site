@@ -6,23 +6,48 @@
   <title>Share this Vote</title>
   <link rel="stylesheet" href="style.css" />
   <style>
-    /* Small extra layout for share page */
+    /* Share page container */
     .share-container {
       max-width: 720px;
       margin: 40px auto;
       background: #fff;
-      padding: 22px;
+      padding: 28px 22px;
       border-radius: 12px;
       box-shadow: 0 6px 18px rgba(0,0,0,0.08);
       text-align: center;
     }
+
+    /* Thank-you / message section */
     .thank-message {
-      font-size: 1rem;
-      font-weight: bold;
-      margin-bottom: 18px;
+      margin-bottom: 20px;
+      line-height: 1.5;
       color: #333;
-      line-height: 1.4;
     }
+    .thank-message h1 {
+      font-size: 1.6rem;
+      color: #1F2937; /* dark slate */
+      margin-bottom: 8px;
+    }
+    .thank-message h2 {
+      font-size: 1.2rem;
+      color: #4B5563; /* gray shade */
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .thank-message p {
+      font-size: 1rem;
+      color: #374151; /* medium gray */
+    }
+    .highlight {
+      color: #EF4444; /* red */
+      font-weight: bold;
+    }
+    .important {
+      color: #10B981; /* green */
+      font-weight: bold;
+    }
+
+    /* Shareable link */
     .site-link {
       display: inline-block;
       background: #f3f4f6;
@@ -31,54 +56,63 @@
       font-weight: 600;
       margin: 10px 0 18px;
       word-break: break-all;
+      cursor: pointer;
     }
-    .share-row { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
+
+    /* Social buttons */
+    .share-row {
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:center;
+      margin-bottom: 20px;
+    }
     .share-btn {
       display:inline-flex; align-items:center; gap:8px;
       padding:10px 14px; border-radius:8px; border: none; cursor:pointer;
       font-weight:600; color:#fff;
     }
-    .wa { background:#25D366; }            /* WhatsApp green */
-    .fb { background:#1877F2; }            /* Facebook blue */
-    .tw { background:#1DA1F2; }            /* X / Twitter blue */
-    .copy { background:#333; }             /* copy black */
+    .wa { background:#25D366; }   /* WhatsApp green */
+    .fb { background:#1877F2; }   /* Facebook blue */
+    .tw { background:#1DA1F2; }   /* Twitter/X blue */
+    .copy { background:#333; }    /* copy black */
+    
     .small-note { color:#555; font-size:0.9rem; margin-top:14px; }
-    a.share-link { color: inherit; text-decoration: none; display:inline-flex; align-items:center; gap:8px; }
+
+    /* Responsive tweaks */
+    @media (max-width:480px) {
+      .thank-message h1 { font-size:1.3rem; }
+      .thank-message h2 { font-size:1rem; }
+      .thank-message p { font-size:0.95rem; }
+      .share-btn { flex: 1 1 45%; justify-content:center; }
+    }
   </style>
 </head>
 <body class="bg-gray-50" style="font-family:Arial, Helvetica, sans-serif;">
 
   <div class="share-container">
 
-    <!-- Thank-you message -->
+    <!-- Enhanced Thank-you message -->
     <div class="thank-message">
-      Thank you for voting! Please share this link with friends and family to vote and know the popular Chief Minister and party for the Tamil Nadu 2026 elections.  
-      Your future is in your hands—understand the political parties and choose wisely for May 2026.
+      <h1>🙏 Thank You for Voting!</h1>
+      <h2>Spread the Word & Help Friends Decide</h2>
+      <p>
+        Your <span class="highlight">future is in your hands</span>. 
+        Share this voting link with friends and family to vote and know the 
+        popular Chief Minister and party for the <span class="important">Tamil Nadu 2026 elections</span>.
+        Make an informed choice for the upcoming elections in May 2026.
+      </p>
     </div>
 
     <!-- Shareable link -->
-    <div id="siteLink" class="site-link"></div>
+    <div id="siteLink" class="site-link" title="Click to copy"></div>
 
-    <div class="share-row" style="margin-top:10px">
-      <!-- WhatsApp -->
-      <button id="whatsappBtn" class="share-btn wa" title="Share on WhatsApp">
-        <span>WhatsApp</span>
-      </button>
-
-      <!-- Facebook -->
-      <button id="facebookBtn" class="share-btn fb" title="Share on Facebook">
-        <span>Facebook</span>
-      </button>
-
-      <!-- X / Twitter -->
-      <button id="twitterBtn" class="share-btn tw" title="Share on X (Twitter)">
-        <span>X / Twitter</span>
-      </button>
-
-      <!-- Copy link -->
-      <button id="copyBtn" class="share-btn copy" title="Copy link">
-        <span>Copy Link</span>
-      </button>
+    <!-- Social buttons -->
+    <div class="share-row">
+      <button id="whatsappBtn" class="share-btn wa" title="Share on WhatsApp">WhatsApp</button>
+      <button id="facebookBtn" class="share-btn fb" title="Share on Facebook">Facebook</button>
+      <button id="twitterBtn" class="share-btn tw" title="Share on X / Twitter">X / Twitter</button>
+      <button id="copyBtn" class="share-btn copy" title="Copy link">Copy Link</button>
     </div>
 
     <div class="small-note">
@@ -87,17 +121,9 @@
   </div>
 
   <script>
-    // Get the site link to share (use the current origin + optional path)
     const siteLink = window.location.origin;
     document.getElementById('siteLink').textContent = siteLink;
 
-    // Buttons
-    const whatsappBtn = document.getElementById('whatsappBtn');
-    const facebookBtn = document.getElementById('facebookBtn');
-    const twitterBtn = document.getElementById('twitterBtn');
-    const copyBtn = document.getElementById('copyBtn');
-
-    // Helper: show toast
     function showToast(msg) {
       const toast = document.createElement('div');
       toast.className = 'toast-message';
@@ -107,40 +133,45 @@
       setTimeout(()=> { toast.classList.remove('show'); setTimeout(()=> toast.remove(), 500); }, 2500);
     }
 
-    // WhatsApp share
-    whatsappBtn.addEventListener('click', () => {
+    // Copy link
+    const linkDiv = document.getElementById('siteLink');
+    linkDiv.onclick = async () => {
+      try { 
+        await navigator.clipboard.writeText(siteLink);
+        showToast("✅ Link copied!");
+      } catch {
+        prompt("Copy this link:", siteLink);
+      }
+    };
+
+    // Social buttons
+    document.getElementById('whatsappBtn').onclick = () => {
       const text = encodeURIComponent("Vote here: " + siteLink);
       window.open(`https://wa.me/?text=${text}`, '_blank');
-    });
-
-    // Facebook share
-    facebookBtn.addEventListener('click', () => {
+    };
+    document.getElementById('facebookBtn').onclick = () => {
       const url = encodeURIComponent(siteLink);
       window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank', 'noopener');
-    });
-
-    // Twitter/X share
-    twitterBtn.addEventListener('click', () => {
+    };
+    document.getElementById('twitterBtn').onclick = () => {
       const text = encodeURIComponent("Vote here!");
       const url = encodeURIComponent(siteLink);
       window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank', 'noopener');
-    });
-
-    // Copy link
-    copyBtn.addEventListener('click', async () => {
-      try {
+    };
+    document.getElementById('copyBtn').onclick = async () => {
+      try { 
         await navigator.clipboard.writeText(siteLink);
         showToast("✅ Link copied!");
-      } catch (err) {
+      } catch {
         const input = document.createElement('input');
         input.value = siteLink;
         document.body.appendChild(input);
         input.select();
-        input.setSelectionRange(0, 99999);
-        try { document.execCommand('copy'); showToast("✅ Link copied!"); } catch(e) { prompt("Copy this link:", siteLink); }
+        document.execCommand('copy');
         input.remove();
+        showToast("✅ Link copied!");
       }
-    });
+    };
   </script>
 </body>
 </html>
