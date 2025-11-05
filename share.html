@@ -16,6 +16,13 @@
       box-shadow: 0 6px 18px rgba(0,0,0,0.08);
       text-align: center;
     }
+    .thank-message {
+      font-size: 1rem;
+      font-weight: bold;
+      margin-bottom: 18px;
+      color: #333;
+      line-height: 1.4;
+    }
     .site-link {
       display: inline-block;
       background: #f3f4f6;
@@ -42,10 +49,14 @@
 <body class="bg-gray-50" style="font-family:Arial, Helvetica, sans-serif;">
 
   <div class="share-container">
-    <h1 style="margin:0 0 8px">Share this voting link</h1>
-    <p style="margin:0 0 18px; color:#444">Tap a button below to share the site with friends.</p>
 
-    <!-- Replace window.location.origin in JS will be used to get live URL -->
+    <!-- Thank-you message -->
+    <div class="thank-message">
+      Thank you for voting! Please share this link with friends and family to vote and know the popular Chief Minister and party for the Tamil Nadu 2026 elections.  
+      Your future is in your hands—understand the political parties and choose wisely for May 2026.
+    </div>
+
+    <!-- Shareable link -->
     <div id="siteLink" class="site-link"></div>
 
     <div class="share-row" style="margin-top:10px">
@@ -77,7 +88,7 @@
 
   <script>
     // Get the site link to share (use the current origin + optional path)
-    const siteLink = window.location.origin; // if your voting page is at root, good. Change if needed.
+    const siteLink = window.location.origin;
     document.getElementById('siteLink').textContent = siteLink;
 
     // Buttons
@@ -96,40 +107,36 @@
       setTimeout(()=> { toast.classList.remove('show'); setTimeout(()=> toast.remove(), 500); }, 2500);
     }
 
-    // WhatsApp share (opens web/phone WhatsApp with prefilled text)
+    // WhatsApp share
     whatsappBtn.addEventListener('click', () => {
       const text = encodeURIComponent("Vote here: " + siteLink);
-      const url = `https://wa.me/?text=${text}`;
-      window.open(url, '_blank');
+      window.open(`https://wa.me/?text=${text}`, '_blank');
     });
 
-    // Facebook share (opens share dialog)
+    // Facebook share
     facebookBtn.addEventListener('click', () => {
       const url = encodeURIComponent(siteLink);
-      const fb = `https://www.facebook.com/sharer/sharer.php?u=${url}`;
-      window.open(fb, '_blank', 'noopener');
+      window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank', 'noopener');
     });
 
-    // Twitter / X share (prefilled tweet)
+    // Twitter/X share
     twitterBtn.addEventListener('click', () => {
       const text = encodeURIComponent("Vote here!");
       const url = encodeURIComponent(siteLink);
-      const tw = `https://twitter.com/intent/tweet?text=${text}&url=${url}`;
-      window.open(tw, '_blank', 'noopener');
+      window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank', 'noopener');
     });
 
-    // Copy link (clipboard API + fallback + toast)
+    // Copy link
     copyBtn.addEventListener('click', async () => {
       try {
         await navigator.clipboard.writeText(siteLink);
         showToast("✅ Link copied!");
       } catch (err) {
-        // fallback for older browsers
         const input = document.createElement('input');
         input.value = siteLink;
         document.body.appendChild(input);
         input.select();
-        input.setSelectionRange(0, 99999); // mobile
+        input.setSelectionRange(0, 99999);
         try { document.execCommand('copy'); showToast("✅ Link copied!"); } catch(e) { prompt("Copy this link:", siteLink); }
         input.remove();
       }
