@@ -1,4 +1,3 @@
-// results.js
 import { db, dbRef, get } from "./firebase.js";
 
 // --- Candidate details ---
@@ -16,8 +15,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   const resultsGrid = document.getElementById("results-grid");
   const shareBtn = document.getElementById("shareBtn");
   const copyBtn = document.getElementById("copyBtn");
+  const top3Container = document.getElementById("top3-container");
 
   // Load initial results
+  const data = await fetchResults();
+  renderTop3(top3Container, data);
   await loadResults(resultsGrid);
 
   // ================================
@@ -28,7 +30,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       const data = await fetchResults();
       const total = Object.values(data).reduce((sum, obj) => sum + (obj.count || 0), 0);
 
-      // Create popup overlay
       const popup = document.createElement("div");
       popup.className = "popup-overlay";
       popup.innerHTML = `
@@ -57,10 +58,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       `;
       document.body.appendChild(popup);
 
-      // Close button handler
       document.getElementById("popupClose").onclick = () => popup.remove();
 
-      // Share results handler
       document.getElementById("popupShare").onclick = async () => {
         const link = window.location.origin;
         const shareText = `📊 Check out live voting results — see who’s leading! Vote here 👉 ${link}`;
@@ -80,7 +79,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // ================================
-  // OPEN LINK BUTTON
+  // COPY LINK BUTTON
   // ================================
   if (copyBtn) {
     copyBtn.addEventListener("click", async () => {
@@ -89,16 +88,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         await navigator.clipboard.writeText(link);
         showToast("✅ Link copied!");
       } catch (err) {
-        console.warn("Clipboard failed, using fallback:", err);
-
-        // fallback (older browsers)
         const tempInput = document.createElement("input");
         tempInput.value = link;
         document.body.appendChild(tempInput);
         tempInput.select();
         document.execCommand("copy");
         tempInput.remove();
-
         showToast("✅ Link copied!");
       }
     });
@@ -115,7 +110,7 @@ async function fetchResults() {
   return snapshot.val() || {};
 }
 
-// Load and render results on the main results page
+// Load and render full results on main page
 async function loadResults(resultsGrid) {
   const data = await fetchResults();
   let total = 0;
@@ -139,8 +134,31 @@ async function loadResults(resultsGrid) {
   });
 }
 
+// Render top 3 parties with vote count
+function renderTop3(container, data) {
+  if (!container) return;
+
+  // Compute top 3 by count
+  const top3 = images
+    .map((img) => ({ ...img, count: data[img.id]?.count || 0 }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 3);
+
+  container.innerHTML = top3
+    .map(
+      (p, idx) => `
+    <div class="result-row">
+      <div class="rank-num">${idx + 1}</div>
+      <img src="${p.src}" class="small-img" alt="${p.name}" />
+      <div class="result-text">${p.name} — ${p.count} votes</div>
+    </div>
+  `
+    )
+    .join("");
+}
+
 // ================================
-// TOAST MESSAGE (Black Popup)
+// TOAST MESSAGE
 // ================================
 function showToast(message) {
   const toast = document.createElement("div");
@@ -148,10 +166,7 @@ function showToast(message) {
   toast.textContent = message;
   document.body.appendChild(toast);
 
-  // Trigger fade-in
   setTimeout(() => toast.classList.add("show"), 10);
-
-  // Fade out after 2.5s
   setTimeout(() => {
     toast.classList.remove("show");
     setTimeout(() => toast.remove(), 500);
