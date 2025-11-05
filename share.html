@@ -6,7 +6,6 @@
   <title>Share this Vote</title>
   <link rel="stylesheet" href="style.css" />
   <style>
-    /* Share page container */
     .share-container {
       max-width: 720px;
       margin: 40px auto;
@@ -24,7 +23,6 @@
       color: #333;
     }
 
-    /* Shareable link */
     .site-link {
       display: inline-block;
       background: #f3f4f6;
@@ -36,7 +34,6 @@
       cursor: pointer;
     }
 
-    /* Social buttons */
     .share-row {
       display:flex;
       gap:10px;
@@ -49,14 +46,13 @@
       padding:10px 14px; border-radius:8px; border: none; cursor:pointer;
       font-weight:600; color:#fff;
     }
-    .wa { background:#25D366; }   /* WhatsApp green */
-    .fb { background:#1877F2; }   /* Facebook blue */
-    .tw { background:#1DA1F2; }   /* Twitter/X blue */
-    .copy { background:#333; }    /* copy black */
-    
+    .wa { background:#25D366; }
+    .fb { background:#1877F2; }
+    .tw { background:#1DA1F2; }
+    .copy { background:#333; }
+
     .small-note { color:#555; font-size:0.9rem; margin-top:14px; }
 
-    /* Top 3 parties results */
     .top-results {
       display:flex;
       justify-content:center;
@@ -64,7 +60,6 @@
       margin-bottom: 20px;
       flex-wrap:wrap;
     }
-
     .party-card {
       background:#f9fafb;
       border-radius:12px;
@@ -76,7 +71,6 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
       position:relative;
     }
-
     .party-card img {
       width:60px;
       height:60px;
@@ -84,7 +78,6 @@
       border-radius:50%;
       margin-bottom:6px;
     }
-
     .vote-count {
       position:absolute;
       top:-6px;
@@ -97,7 +90,6 @@
       padding:4px 7px;
       box-shadow:0 2px 5px rgba(0,0,0,0.2);
     }
-
     .party-name { font-weight:600; font-size:0.9rem; text-align:center; }
   </style>
 </head>
@@ -134,14 +126,10 @@
       const linkDiv = document.getElementById("siteLink");
       linkDiv.textContent = siteLink;
 
-      // Click to copy link
+      // Clickable link copy
       linkDiv.onclick = async () => {
-        try { 
-          await navigator.clipboard.writeText(siteLink);
-          showToast("✅ Link copied!");
-        } catch {
-          prompt("Copy this link:", siteLink);
-        }
+        try { await navigator.clipboard.writeText(siteLink); showToast("✅ Link copied!"); } 
+        catch { prompt("Copy this link:", siteLink); }
       };
 
       // Toast helper
@@ -156,31 +144,17 @@
 
       // Social buttons
       document.getElementById('whatsappBtn').onclick = () => {
-        const text = encodeURIComponent("Vote here: " + siteLink);
-        window.open(`https://wa.me/?text=${text}`, '_blank');
+        window.open(`https://wa.me/?text=${encodeURIComponent("Vote here: "+siteLink)}`, '_blank');
       };
       document.getElementById('facebookBtn').onclick = () => {
-        const url = encodeURIComponent(siteLink);
-        window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank', 'noopener');
+        window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(siteLink)}`, '_blank','noopener');
       };
       document.getElementById('twitterBtn').onclick = () => {
-        const text = encodeURIComponent("Vote here!");
-        const url = encodeURIComponent(siteLink);
-        window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank', 'noopener');
+        window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent("Vote here!")}&url=${encodeURIComponent(siteLink)}`, '_blank','noopener');
       };
       document.getElementById('copyBtn').onclick = async () => {
-        try { 
-          await navigator.clipboard.writeText(siteLink);
-          showToast("✅ Link copied!");
-        } catch {
-          const input = document.createElement('input');
-          input.value = siteLink;
-          document.body.appendChild(input);
-          input.select();
-          document.execCommand('copy');
-          input.remove();
-          showToast("✅ Link copied!");
-        }
+        try { await navigator.clipboard.writeText(siteLink); showToast("✅ Link copied!"); }
+        catch { const input = document.createElement('input'); input.value = siteLink; document.body.appendChild(input); input.select(); document.execCommand('copy'); input.remove(); showToast("✅ Link copied!"); }
       };
 
       // --- Top 3 parties ---
@@ -197,32 +171,18 @@
         try {
           const snapshot = await get(dbRef(db, "votes"));
           const data = snapshot.val() || {};
-
-          const counts = images.map(img => ({
-            id: img.id,
-            name: img.name,
-            src: img.src,
-            count: data[img.id]?.count || 0
-          }));
-
+          const counts = images.map(img => ({ id: img.id, name: img.name, src: img.src, count: data[img.id]?.count || 0 }));
           counts.sort((a,b) => b.count - a.count);
           const top3 = counts.slice(0,3);
-
           const topResultsDiv = document.getElementById('topResults');
           topResultsDiv.innerHTML = "";
           top3.forEach(c => {
             const card = document.createElement('div');
             card.className = 'party-card';
-            card.innerHTML = `
-              <img src="${c.src}" alt="${c.name}" />
-              <div class="vote-count">${c.count}</div>
-              <div class="party-name">${c.name}</div>
-            `;
+            card.innerHTML = `<img src="${c.src}" alt="${c.name}" /><div class="vote-count">${c.count}</div><div class="party-name">${c.name}</div>`;
             topResultsDiv.appendChild(card);
           });
-        } catch(err) {
-          console.error("Error fetching results:", err);
-        }
+        } catch(err){ console.error("Error fetching results:", err); }
       }
 
       fetchTopResults();
