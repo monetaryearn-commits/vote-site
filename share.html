@@ -3,10 +3,10 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Share this Vote</title>
+  <title>Share Your Vote</title>
   <link rel="stylesheet" href="style.css" />
   <style>
-    /* Small extra layout for share page */
+    /* Share page container */
     .share-container {
       max-width: 720px;
       margin: 40px auto;
@@ -17,30 +17,35 @@
       text-align: center;
     }
 
+    /* Shareable link box */
     .site-link {
       display: inline-block;
+      width: 100%;
+      max-width: 400px;
       background: #f3f4f6;
       padding: 10px 14px;
       border-radius: 8px;
       font-weight: 600;
       margin: 10px 0 18px;
       word-break: break-all;
+      cursor: pointer;
     }
 
-    .share-row { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
+    .share-row {
+      display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin-top:10px;
+    }
     .share-btn {
       display:inline-flex; align-items:center; gap:8px;
       padding:10px 14px; border-radius:8px; border: none; cursor:pointer;
       font-weight:600; color:#fff;
     }
-    .wa { background:#25D366; }            /* WhatsApp green */
-    .fb { background:#1877F2; }            /* Facebook blue */
-    .tw { background:#1DA1F2; }            /* X / Twitter blue */
-    .copy { background:#333; }             /* copy black */
+    .wa { background:#25D366; }
+    .fb { background:#1877F2; }
+    .tw { background:#1DA1F2; }
+    .copy { background:#333; }
     .small-note { color:#555; font-size:0.9rem; margin-top:14px; }
-    a.share-link { color: inherit; text-decoration: none; display:inline-flex; align-items:center; gap:8px; }
 
-    /* Top 3 parties results */
+    /* Top 3 parties display */
     .top-results {
       display:flex;
       justify-content:center;
@@ -48,7 +53,6 @@
       margin-bottom: 20px;
       flex-wrap:wrap;
     }
-
     .party-card {
       background:#f9fafb;
       border-radius:12px;
@@ -60,7 +64,6 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
       position:relative;
     }
-
     .party-card img {
       width:60px;
       height:60px;
@@ -68,7 +71,6 @@
       border-radius:50%;
       margin-bottom:6px;
     }
-
     .vote-count {
       position:absolute;
       top:-6px;
@@ -81,47 +83,41 @@
       padding:4px 7px;
       box-shadow:0 2px 5px rgba(0,0,0,0.2);
     }
-
     .party-name { font-weight:600; font-size:0.9rem; text-align:center; }
-
   </style>
 </head>
-<body style="font-family:Arial, Helvetica, sans-serif; background:#f9fafb;">
+<body style="font-family:Arial, Helvetica, sans-serif; background:#f0f2f5;">
 
   <div class="share-container">
-    <h1 style="margin:0 0 8px">Thank you for voting!</h1>
-    <p style="margin:0 0 18px; color:#444">Here are the top 3 parties currently leading:</p>
+    <h1 style="margin-bottom:12px;">Thank You for Voting!</h1>
+    <p style="margin-bottom:18px; color:#444;">
+      Please share this link with your friends and family so everyone can vote and see which party is leading.
+    </p>
 
-    <!-- Top 3 parties -->
-    <div id="top3-container" class="top-results"></div>
+    <!-- Top 3 parties display -->
+    <div id="topResults" class="top-results"></div>
 
-    <h2 style="margin-top:20px; font-size:1.1rem">Share this voting link</h2>
-    <div id="siteLink" class="site-link"></div>
+    <!-- Shareable link -->
+    <div id="siteLink" class="site-link" title="Click to copy"></div>
 
-    <div class="share-row" style="margin-top:10px">
-      <!-- WhatsApp -->
+    <!-- Social share buttons -->
+    <div class="share-row">
       <button id="whatsappBtn" class="share-btn wa" title="Share on WhatsApp">
-        <span>WhatsApp</span>
+        WhatsApp
       </button>
-
-      <!-- Facebook -->
       <button id="facebookBtn" class="share-btn fb" title="Share on Facebook">
-        <span>Facebook</span>
+        Facebook
       </button>
-
-      <!-- X / Twitter -->
-      <button id="twitterBtn" class="share-btn tw" title="Share on X (Twitter)">
-        <span>X / Twitter</span>
+      <button id="twitterBtn" class="share-btn tw" title="Share on X / Twitter">
+        X / Twitter
       </button>
-
-      <!-- Copy link -->
       <button id="copyBtn" class="share-btn copy" title="Copy link">
-        <span>Copy Link</span>
+        Copy Link
       </button>
     </div>
 
     <div class="small-note">
-      Tip: On Instagram you can paste this link in your bio or add it to a story (if you have link/sticker access).
+      Tip: On Instagram, you can paste this link in your bio or add it to a story if link/sticker access is available.
     </div>
   </div>
 
@@ -129,13 +125,20 @@
     import { db, dbRef, get } from "./firebase.js";
 
     const siteLink = window.location.origin;
-    document.getElementById('siteLink').textContent = siteLink;
+    const linkDiv = document.getElementById("siteLink");
+    linkDiv.textContent = siteLink;
 
-    const whatsappBtn = document.getElementById('whatsappBtn');
-    const facebookBtn = document.getElementById('facebookBtn');
-    const twitterBtn = document.getElementById('twitterBtn');
-    const copyBtn = document.getElementById('copyBtn');
+    // Copy link when user clicks the box itself
+    linkDiv.onclick = async () => {
+      try { 
+        await navigator.clipboard.writeText(siteLink);
+        showToast("✅ Link copied!"); 
+      } catch {
+        prompt("Copy this link:", siteLink);
+      }
+    };
 
+    // Toast helper
     function showToast(msg) {
       const toast = document.createElement('div');
       toast.className = 'toast-message';
@@ -145,24 +148,22 @@
       setTimeout(()=> { toast.classList.remove('show'); setTimeout(()=> toast.remove(), 500); }, 2500);
     }
 
-    whatsappBtn.addEventListener('click', () => {
+    // Social buttons
+    document.getElementById('whatsappBtn').onclick = () => {
       const text = encodeURIComponent("Vote here: " + siteLink);
       window.open(`https://wa.me/?text=${text}`, '_blank');
-    });
-
-    facebookBtn.addEventListener('click', () => {
+    };
+    document.getElementById('facebookBtn').onclick = () => {
       const url = encodeURIComponent(siteLink);
       window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank', 'noopener');
-    });
-
-    twitterBtn.addEventListener('click', () => {
+    };
+    document.getElementById('twitterBtn').onclick = () => {
       const text = encodeURIComponent("Vote here!");
       const url = encodeURIComponent(siteLink);
       window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank', 'noopener');
-    });
-
-    copyBtn.addEventListener('click', async () => {
-      try {
+    };
+    document.getElementById('copyBtn').onclick = async () => {
+      try { 
         await navigator.clipboard.writeText(siteLink);
         showToast("✅ Link copied!");
       } catch {
@@ -170,15 +171,13 @@
         input.value = siteLink;
         document.body.appendChild(input);
         input.select();
-        input.setSelectionRange(0,99999);
-        try { document.execCommand('copy'); showToast("✅ Link copied!"); } 
-        catch(e){ prompt("Copy this link:", siteLink); }
+        document.execCommand('copy');
         input.remove();
+        showToast("✅ Link copied!");
       }
-    });
+    };
 
-    // --- Show top 3 parties by votes ---
-    const top3Container = document.getElementById('top3-container');
+    // --- Top 3 parties logic ---
     const images = [
       { id: "1", src: "https://i.imgur.com/KyJZtHX.jpg", name: "TVK" },
       { id: "2", src: "https://i.imgur.com/enzBSYA.jpg", name: "DMK" },
@@ -200,10 +199,11 @@
           count: data[img.id]?.count || 0
         }));
 
-        counts.sort((a,b) => b.count - a.count); // descending
-
+        counts.sort((a,b) => b.count - a.count);
         const top3 = counts.slice(0,3);
-        top3Container.innerHTML = "";
+
+        const topResultsDiv = document.getElementById('topResults');
+        topResultsDiv.innerHTML = "";
         top3.forEach(c => {
           const card = document.createElement('div');
           card.className = 'party-card';
@@ -212,15 +212,16 @@
             <div class="vote-count">${c.count}</div>
             <div class="party-name">${c.name}</div>
           `;
-          top3Container.appendChild(card);
+          topResultsDiv.appendChild(card);
         });
       } catch(err) {
         console.error("Error fetching results:", err);
-        top3Container.innerHTML = "<p style='color:red;'>Error loading top parties</p>";
       }
     }
 
     fetchTopResults();
+    setInterval(fetchTopResults, 6000); // refresh top 3 every 6s
   </script>
+
 </body>
 </html>
