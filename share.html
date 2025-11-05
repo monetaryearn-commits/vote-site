@@ -33,11 +33,12 @@
       padding:10px 14px; border-radius:8px; border: none; cursor:pointer;
       font-weight:600; color:#fff;
     }
-    .wa { background:#25D366; }
-    .fb { background:#1877F2; }
-    .tw { background:#1DA1F2; }
-    .copy { background:#333; }
+    .wa { background:#25D366; }            /* WhatsApp green */
+    .fb { background:#1877F2; }            /* Facebook blue */
+    .tw { background:#1DA1F2; }            /* X / Twitter blue */
+    .copy { background:#333; }             /* copy black */
     .small-note { color:#555; font-size:0.9rem; margin-top:14px; }
+    a.share-link { color: inherit; text-decoration: none; display:inline-flex; align-items:center; gap:8px; }
 
     /* Top 3 parties results */
     .top-results {
@@ -82,9 +83,10 @@
     }
 
     .party-name { font-weight:600; font-size:0.9rem; text-align:center; }
+
   </style>
 </head>
-<body style="font-family:Arial, Helvetica, sans-serif;">
+<body style="font-family:Arial, Helvetica, sans-serif; background:#f9fafb;">
 
   <div class="share-container">
     <h1 style="margin:0 0 8px">Thank you for voting!</h1>
@@ -97,10 +99,25 @@
     <div id="siteLink" class="site-link"></div>
 
     <div class="share-row" style="margin-top:10px">
-      <button id="whatsappBtn" class="share-btn wa">WhatsApp</button>
-      <button id="facebookBtn" class="share-btn fb">Facebook</button>
-      <button id="twitterBtn" class="share-btn tw">X / Twitter</button>
-      <button id="copyBtn" class="share-btn copy">Copy Link</button>
+      <!-- WhatsApp -->
+      <button id="whatsappBtn" class="share-btn wa" title="Share on WhatsApp">
+        <span>WhatsApp</span>
+      </button>
+
+      <!-- Facebook -->
+      <button id="facebookBtn" class="share-btn fb" title="Share on Facebook">
+        <span>Facebook</span>
+      </button>
+
+      <!-- X / Twitter -->
+      <button id="twitterBtn" class="share-btn tw" title="Share on X (Twitter)">
+        <span>X / Twitter</span>
+      </button>
+
+      <!-- Copy link -->
+      <button id="copyBtn" class="share-btn copy" title="Copy link">
+        <span>Copy Link</span>
+      </button>
     </div>
 
     <div class="small-note">
@@ -161,8 +178,7 @@
     });
 
     // --- Show top 3 parties by votes ---
-    const topResultsDiv = document.getElementById('top3-container');
-
+    const top3Container = document.getElementById('top3-container');
     const images = [
       { id: "1", src: "https://i.imgur.com/KyJZtHX.jpg", name: "TVK" },
       { id: "2", src: "https://i.imgur.com/enzBSYA.jpg", name: "DMK" },
@@ -187,7 +203,7 @@
         counts.sort((a,b) => b.count - a.count); // descending
 
         const top3 = counts.slice(0,3);
-        topResultsDiv.innerHTML = "";
+        top3Container.innerHTML = "";
         top3.forEach(c => {
           const card = document.createElement('div');
           card.className = 'party-card';
@@ -196,11 +212,11 @@
             <div class="vote-count">${c.count}</div>
             <div class="party-name">${c.name}</div>
           `;
-          topResultsDiv.appendChild(card);
+          top3Container.appendChild(card);
         });
       } catch(err) {
         console.error("Error fetching results:", err);
-        topResultsDiv.innerHTML = "<p style='color:red;'>Error loading top parties</p>";
+        top3Container.innerHTML = "<p style='color:red;'>Error loading top parties</p>";
       }
     }
 
