@@ -1,23 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vote for Your Favorite</title>
-    <link rel="stylesheet" href="style.css" />
-  </head>
-  <body class="bg-gray-50 text-center p-4">
-    <h1 class="text-2xl font-bold mb-4">Vote for Your Favorite</h1>
-    <p class="text-gray-700 mb-6">
-      Click an image to cast your vote (one click = one vote).<br />
-      After voting, you’ll be taken to the results page where you can share.
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tamil Nadu - 2026 Election Survey</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header class="page-header">
+    <h1>🗳️ Tamil Nadu - 2026 Election Survey</h1>
+    <p class="subtitle">
+      <strong><em>Vote wisely</em></strong> to choose the right leader — the one who will
+      <strong><em>transform our state’s future</em></strong> and ensure good governance for every Tamilian.
     </p>
+  </header>
 
-    <!-- ✅ This is where the images will appear -->
-    <div id="image-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 max-w-4xl mx-auto"></div>
+  <main>
+    <div id="image-grid"></div>
 
-    <!-- ✅ Make sure to include your JS files in the correct order -->
-    <script type="module" src="firebase.js"></script>
-    <script type="module" src="script.js"></script>
-  </body>
+    <div class="slogan">
+      <p><strong>Truth Alone Triumphs</strong></p>
+      <p class="tamil"><em>“வாய்மையே வெல்லும்”</em></p>
+    </div>
+  </main>
+
+  <script type="module" src="script.js"></script>
+</body>
 </html>
