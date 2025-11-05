@@ -1,6 +1,61 @@
 // script.js
 import { db, dbRef, runTransaction } from "./firebase.js";
 
+// Voting options and images
+const images = [
+  { id: "1", src: "https://i.imgur.com/KyJZtHX.jpg", name: "TVK" },
+  { id: "2", src: "https://i.imgur.com/enzBSYA.jpg", name: "DMK" },
+  { id: "3", src: "https://i.imgur.com/XLck5Jb.jpg", name: "ADMK" },
+  { id: "4", src: "https://i.imgur.com/4yCMosN.jpg", name: "BJP" },
+  { id: "5", src: "https://i.imgur.com/bELcRVl.jpg", name: "NTK" },
+  { id: "6", src: "https://i.imgur.com/7cjHmIJ.jpg", name: "DMDK" },
+];
+
+const imageGrid = document.getElementById("image-grid");
+const voted = localStorage.getItem("votedFor");
+
+// Display each image with label
+images.forEach((img) => {
+  const wrapper = document.createElement("div");
+  wrapper.className = "relative";
+
+  const el = document.createElement("img");
+  el.src = img.src;
+  el.alt = img.name;
+  el.className =
+    "w-full rounded-lg shadow-md cursor-pointer transition-transform hover:scale-105";
+
+  const label = document.createElement("div");
+  label.className = "text-sm text-center mt-2 font-semibold";
+  label.textContent = img.name;
+
+  // Voting click action
+  el.onclick = async () => {
+    if (voted) {
+      alert("You already voted for: " + voted);
+      window.location.href = "share.html";
+      return;
+    }
+
+    try {
+      const voteRef = dbRef(db, "votes/" + img.id + "/count");
+      await runTransaction(voteRef, (current) => (current || 0) + 1);
+      localStorage.setItem("votedFor", img.name);
+      window.location.href = "share.html";
+    } catch (err) {
+      console.error("Voting failed:", err);
+      alert("There was an error submitting your vote. Please try again.");
+    }
+  };
+
+  wrapper.appendChild(el);
+  wrapper.appendChild(label);
+  imageGrid.appendChild(wrapper);
+});
+
+/*// script.js
+import { db, dbRef, runTransaction } from "./firebase.js";
+
 // 👇 Your voting options and images
 const images = [
   { id: "1", src: "https://i.imgur.com/KyJZtHX.jpg", name: "TVK" },
@@ -127,3 +182,4 @@ if (resultsDiv) {
     };
   }
 }
+*/
