@@ -16,6 +16,7 @@
       box-shadow: 0 6px 18px rgba(0,0,0,0.08);
       text-align: center;
     }
+
     .site-link {
       display: inline-block;
       background: #f3f4f6;
@@ -25,6 +26,7 @@
       margin: 10px 0 18px;
       word-break: break-all;
     }
+
     .share-row { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
     .share-btn {
       display:inline-flex; align-items:center; gap:8px;
@@ -37,15 +39,63 @@
     .copy { background:#333; }             /* copy black */
     .small-note { color:#555; font-size:0.9rem; margin-top:14px; }
     a.share-link { color: inherit; text-decoration: none; display:inline-flex; align-items:center; gap:8px; }
+
+    /* Top 3 parties results */
+    .top-results {
+      display:flex;
+      justify-content:center;
+      gap:20px;
+      margin-bottom: 20px;
+      flex-wrap:wrap;
+    }
+
+    .party-card {
+      background:#f9fafb;
+      border-radius:12px;
+      padding:10px;
+      width:100px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      position:relative;
+    }
+
+    .party-card img {
+      width:60px;
+      height:60px;
+      object-fit:cover;
+      border-radius:50%;
+      margin-bottom:6px;
+    }
+
+    .vote-count {
+      position:absolute;
+      top:-6px;
+      right:-6px;
+      background:#4CAF50;
+      color:white;
+      font-size:0.8rem;
+      font-weight:bold;
+      border-radius:50%;
+      padding:4px 7px;
+      box-shadow:0 2px 5px rgba(0,0,0,0.2);
+    }
+
+    .party-name { font-weight:600; font-size:0.9rem; text-align:center; }
+
   </style>
 </head>
 <body class="bg-gray-50" style="font-family:Arial, Helvetica, sans-serif;">
 
   <div class="share-container">
-    <h1 style="margin:0 0 8px">Share this voting link</h1>
-    <p style="margin:0 0 18px; color:#444">Tap a button below to share the site with friends.</p>
+    <h1 style="margin:0 0 8px">Thank you for voting!</h1>
+    <p style="margin:0 0 18px; color:#444">Here are the top 3 parties currently leading:</p>
 
-    <!-- Replace window.location.origin in JS will be used to get live URL -->
+    <!-- Top 3 parties -->
+    <div id="topResults" class="top-results"></div>
+
+    <h2 style="margin-top:20px; font-size:1.1rem">Share this voting link</h2>
     <div id="siteLink" class="site-link"></div>
 
     <div class="share-row" style="margin-top:10px">
@@ -75,18 +125,17 @@
     </div>
   </div>
 
-  <script>
-    // Get the site link to share (use the current origin + optional path)
-    const siteLink = window.location.origin; // if your voting page is at root, good. Change if needed.
+  <script type="module">
+    import { db, dbRef, get } from "./firebase.js";
+
+    const siteLink = window.location.origin;
     document.getElementById('siteLink').textContent = siteLink;
 
-    // Buttons
     const whatsappBtn = document.getElementById('whatsappBtn');
     const facebookBtn = document.getElementById('facebookBtn');
     const twitterBtn = document.getElementById('twitterBtn');
     const copyBtn = document.getElementById('copyBtn');
 
-    // Helper: show toast
     function showToast(msg) {
       const toast = document.createElement('div');
       toast.className = 'toast-message';
@@ -96,44 +145,83 @@
       setTimeout(()=> { toast.classList.remove('show'); setTimeout(()=> toast.remove(), 500); }, 2500);
     }
 
-    // WhatsApp share (opens web/phone WhatsApp with prefilled text)
     whatsappBtn.addEventListener('click', () => {
       const text = encodeURIComponent("Vote here: " + siteLink);
-      const url = `https://wa.me/?text=${text}`;
-      window.open(url, '_blank');
+      window.open(`https://wa.me/?text=${text}`, '_blank');
     });
 
-    // Facebook share (opens share dialog)
     facebookBtn.addEventListener('click', () => {
       const url = encodeURIComponent(siteLink);
-      const fb = `https://www.facebook.com/sharer/sharer.php?u=${url}`;
-      window.open(fb, '_blank', 'noopener');
+      window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank', 'noopener');
     });
 
-    // Twitter / X share (prefilled tweet)
     twitterBtn.addEventListener('click', () => {
       const text = encodeURIComponent("Vote here!");
       const url = encodeURIComponent(siteLink);
-      const tw = `https://twitter.com/intent/tweet?text=${text}&url=${url}`;
-      window.open(tw, '_blank', 'noopener');
+      window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank', 'noopener');
     });
 
-    // Copy link (clipboard API + fallback + toast)
     copyBtn.addEventListener('click', async () => {
       try {
         await navigator.clipboard.writeText(siteLink);
         showToast("✅ Link copied!");
-      } catch (err) {
-        // fallback for older browsers
+      } catch {
         const input = document.createElement('input');
         input.value = siteLink;
         document.body.appendChild(input);
         input.select();
-        input.setSelectionRange(0, 99999); // mobile
-        try { document.execCommand('copy'); showToast("✅ Link copied!"); } catch(e) { prompt("Copy this link:", siteLink); }
+        input.setSelectionRange(0,99999);
+        try { document.execCommand('copy'); showToast("✅ Link copied!"); } 
+        catch(e){ prompt("Copy this link:", siteLink); }
         input.remove();
       }
     });
+
+    // --- Show top 3 parties by votes ---
+    const topResultsDiv = document.getElementById('topResults');
+
+    const images = [
+      { id: "1", src: "https://i.imgur.com/KyJZtHX.jpg", name: "TVK" },
+      { id: "2", src: "https://i.imgur.com/enzBSYA.jpg", name: "DMK" },
+      { id: "3", src: "https://i.imgur.com/XLck5Jb.jpg", name: "ADMK" },
+      { id: "4", src: "https://i.imgur.com/4yCMosN.jpg", name: "BJP" },
+      { id: "5", src: "https://i.imgur.com/bELcRVl.jpg", name: "NTK" },
+      { id: "6", src: "https://i.imgur.com/7cjHmIJ.jpg", name: "DMDK" },
+    ];
+
+    async function fetchTopResults() {
+      try {
+        const snapshot = await get(dbRef(db, "votes"));
+        const data = snapshot.val() || {};
+
+        const counts = images.map(img => ({
+          id: img.id,
+          name: img.name,
+          src: img.src,
+          count: data[img.id]?.count || 0
+        }));
+
+        counts.sort((a,b) => b.count - a.count); // descending
+
+        const top3 = counts.slice(0,3);
+        topResultsDiv.innerHTML = "";
+        top3.forEach(c => {
+          const card = document.createElement('div');
+          card.className = 'party-card';
+          card.innerHTML = `
+            <img src="${c.src}" alt="${c.name}" />
+            <div class="vote-count">${c.count}</div>
+            <div class="party-name">${c.name}</div>
+          `;
+          topResultsDiv.appendChild(card);
+        });
+      } catch(err) {
+        console.error("Error fetching results:", err);
+        topResultsDiv.innerHTML = "<p style='color:red;'>Error loading top parties</p>";
+      }
+    }
+
+    fetchTopResults();
   </script>
 </body>
 </html>
