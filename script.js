@@ -127,3 +127,45 @@ if (resultsDiv) {
     };
   }
 }
+
+// Keep all your original code as-is above this point
+
+// --- Additional feature: Fetch and show top 3 parties ---
+// This code runs only on share page (or if #top3-container exists)
+document.addEventListener("DOMContentLoaded", async () => {
+  const top3Container = document.getElementById("top3-container");
+  if (!top3Container) return; // Only run if container exists
+
+  try {
+    const snapshot = await get(dbRef(db, "votes"));
+    const data = snapshot.val() || {};
+
+    // Prepare counts
+    const counts = images.map((img) => ({
+      id: img.id,
+      name: img.name,
+      src: img.src,
+      count: data[img.id]?.count || 0,
+    }));
+
+    // Sort descending
+    counts.sort((a, b) => b.count - a.count);
+    const top3 = counts.slice(0, 3);
+
+    top3Container.innerHTML = "";
+    top3.forEach((c) => {
+      const card = document.createElement("div");
+      card.className = "party-card"; // Use your CSS styles
+      card.innerHTML = `
+        <img src="${c.src}" alt="${c.name}" />
+        <div class="vote-count">${c.count}</div>
+        <div class="party-name">${c.name}</div>
+      `;
+      top3Container.appendChild(card);
+    });
+  } catch (err) {
+    console.error("Error fetching top 3 parties:", err);
+    top3Container.innerHTML =
+      "<p style='color:red;'>Error loading top parties</p>";
+  }
+});
