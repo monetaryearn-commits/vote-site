@@ -14,7 +14,7 @@ const images = [
 const imageGrid = document.getElementById("image-grid");
 const voted = localStorage.getItem("votedFor");
 
-// Display each image with label
+// Display each image with label (Voting Page)
 if (imageGrid) {
   images.forEach((img) => {
     const wrapper = document.createElement("div");
@@ -55,7 +55,7 @@ if (imageGrid) {
   });
 }
 
-// --- Results page logic ---
+// --- Results Page Logic ---
 const resultsDiv = document.getElementById("results");
 if (resultsDiv) {
   const fetchResults = async () => {
@@ -70,7 +70,7 @@ if (resultsDiv) {
         count: data[img.id]?.count || 0,
       }));
 
-      const total = counts.reduce((s, c) => s + c.count, 0);
+      const total = counts.reduce((sum, c) => sum + c.count, 0);
       resultsDiv.innerHTML = "";
 
       counts.forEach((c) => {
@@ -78,6 +78,7 @@ if (resultsDiv) {
         const card = document.createElement("div");
         card.className = "p-2";
 
+        // Highlight the image user voted for
         const votedName = localStorage.getItem("votedFor");
         const borderClass = votedName === c.name ? "border-4 border-green-500" : "border";
 
@@ -100,7 +101,8 @@ if (resultsDiv) {
       }
     } catch (err) {
       console.error("Get results error:", err);
-      resultsDiv.innerHTML = "<div class='text-red-500'>Error loading results. Please refresh.</div>";
+      resultsDiv.innerHTML =
+        "<div class='text-red-500'>Error loading results. Please refresh.</div>";
     }
   };
 
@@ -131,6 +133,7 @@ if (resultsDiv) {
     };
   }
 }
+
 
 /*// script.js
 import { db, dbRef, runTransaction } from "./firebase.js";
