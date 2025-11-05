@@ -1,27 +1,42 @@
-/* style.css */
-
-/* Basic layout styling */
+/* ============================= */
+/* General Page Styling */
+/* ============================= */
 body {
-  font-family: Arial, sans-serif;
+  font-family: "Inter", Arial, sans-serif;
   background-color: #f9fafb;
   text-align: center;
   margin: 0;
   padding: 20px;
+  color: #222;
 }
 
-/* Grid layout for images */
+/* Headings */
+h1 {
+  font-size: 1.8em;
+  color: #222;
+  margin-bottom: 10px;
+}
+
+p {
+  color: #555;
+  margin-bottom: 25px;
+  font-size: 1rem;
+}
+
+/* ============================= */
+/* VOTING PAGE IMAGE GRID */
+/* ============================= */
 #image-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 20px;
   max-width: 900px;
   margin: 0 auto;
 }
 
-/* Each image tile */
 #image-grid img {
   width: 100%;
-  height: 220px;
+  height: 230px;
   object-fit: cover;
   border-radius: 16px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
@@ -31,32 +46,23 @@ body {
 
 #image-grid img:hover {
   transform: scale(1.05);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
 }
 
-/* Label under each image */
 #image-grid div {
   text-align: center;
   font-weight: bold;
   margin-top: 6px;
   color: #333;
+  font-size: 1rem;
 }
 
-/* Headings */
-h1 {
-  font-size: 1.8em;
-  color: #222;
-}
-
-p {
-  color: #555;
-  margin-bottom: 20px;
-}
-
-/* Results page grid */
+/* ============================= */
+/* RESULTS PAGE GRID */
+/* ============================= */
 .results-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 20px;
   max-width: 900px;
   margin: 20px auto;
@@ -66,8 +72,13 @@ p {
   background: #fff;
   border-radius: 16px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  padding: 10px;
+  padding: 15px;
   text-align: center;
+  transition: transform 0.2s ease;
+}
+
+.result-item:hover {
+  transform: translateY(-5px);
 }
 
 .result-img {
@@ -94,9 +105,18 @@ p {
   height: 100%;
   background-color: #4CAF50;
   border-radius: 10px;
-  transition: width 0.5s;
+  transition: width 0.6s ease;
 }
 
+.result-info p {
+  margin-top: 5px;
+  font-size: 0.95rem;
+  color: #333;
+}
+
+/* ============================= */
+/* BUTTONS */
+/* ============================= */
 .buttons {
   margin-top: 30px;
 }
@@ -105,19 +125,26 @@ button {
   background-color: #4CAF50;
   color: white;
   border: none;
-  padding: 12px 24px;
+  padding: 12px 26px;
   border-radius: 8px;
   cursor: pointer;
   margin: 10px;
   font-size: 1em;
-  transition: background-color 0.2s;
+  transition: background-color 0.2s ease, transform 0.1s ease;
 }
 
 button:hover {
-  background-color: #45a049;
+  background-color: #43a047;
+  transform: translateY(-2px);
 }
 
-/* Popup styling */
+button:active {
+  transform: translateY(1px);
+}
+
+/* ============================= */
+/* POPUP OVERLAY */
+/* ============================= */
 .popup-overlay {
   position: fixed;
   top: 0;
@@ -129,6 +156,7 @@ button:hover {
   justify-content: center;
   align-items: center;
   z-index: 9999;
+  backdrop-filter: blur(3px);
 }
 
 .popup {
@@ -136,14 +164,20 @@ button:hover {
   border-radius: 16px;
   padding: 20px;
   width: 90%;
-  max-width: 500px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  max-width: 480px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
   text-align: center;
   animation: fadeIn 0.3s ease-in-out;
 }
 
+.popup h2 {
+  margin-bottom: 15px;
+  color: #222;
+}
+
 .popup-row {
-  margin-bottom: 10px;
+  margin-bottom: 12px;
+  text-align: left;
 }
 
 .popup-bar {
@@ -158,45 +192,83 @@ button:hover {
   background-color: #4CAF50;
   height: 100%;
   border-radius: 10px;
+  transition: width 0.6s ease;
 }
 
-.popup button {
-  margin: 10px;
+.popup-row small {
+  color: #555;
+  font-size: 0.85rem;
+}
+
+.popup-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.popup-buttons button {
+  margin: 0;
   padding: 10px 20px;
-  background-color: #4CAF50;
-  color: white;
-  border: none;
   border-radius: 8px;
-  cursor: pointer;
+  font-size: 0.95rem;
 }
 
-.popup button:hover {
-  background-color: #45a049;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
-}
-
-/* Toast message (black fading popup) */
+/* ============================= */
+/* TOAST MESSAGE */
+/* ============================= */
 .toast-message {
   position: fixed;
   bottom: 30px;
   left: 50%;
   transform: translateX(-50%) translateY(50px);
-  background: rgba(0, 0, 0, 0.85);
+  background: rgba(0, 0, 0, 0.88);
   color: white;
-  padding: 10px 20px;
-  border-radius: 8px;
+  padding: 12px 24px;
+  border-radius: 10px;
   opacity: 0;
   transition: all 0.5s ease;
   z-index: 10000;
   font-size: 15px;
   letter-spacing: 0.3px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .toast-message.show {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
+}
+
+/* ============================= */
+/* ANIMATIONS */
+/* ============================= */
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* ============================= */
+/* RESPONSIVE DESIGN */
+/* ============================= */
+@media (max-width: 600px) {
+  h1 {
+    font-size: 1.5em;
+  }
+
+  #image-grid {
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  }
+
+  .result-img {
+    height: 160px;
+  }
+
+  .popup {
+    padding: 15px;
+  }
+
+  button {
+    padding: 10px 18px;
+    font-size: 0.95rem;
+  }
 }
