@@ -33,7 +33,7 @@ images.forEach((img) => {
   el.onclick = async () => {
     if (voted) {
       alert("You already voted for: " + voted);
-      window.location.href = "results.html";
+      window.location.href = "share.html";
       return;
     }
 
@@ -41,7 +41,7 @@ images.forEach((img) => {
     await runTransaction(voteRef, (current) => (current || 0) + 1);
 
     localStorage.setItem("votedFor", img.name);
-    window.location.href = "results.html";
+    window.location.href = "share.html";
   };
 
   wrapper.appendChild(el);
