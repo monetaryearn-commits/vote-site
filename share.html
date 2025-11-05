@@ -6,6 +6,146 @@
   <title>Share this Vote</title>
   <link rel="stylesheet" href="style.css" />
   <style>
+    /* Small extra layout for share page */
+    .share-container {
+      max-width: 720px;
+      margin: 40px auto;
+      background: #fff;
+      padding: 22px;
+      border-radius: 12px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+      text-align: center;
+    }
+    .site-link {
+      display: inline-block;
+      background: #f3f4f6;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-weight: 600;
+      margin: 10px 0 18px;
+      word-break: break-all;
+    }
+    .share-row { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
+    .share-btn {
+      display:inline-flex; align-items:center; gap:8px;
+      padding:10px 14px; border-radius:8px; border: none; cursor:pointer;
+      font-weight:600; color:#fff;
+    }
+    .wa { background:#25D366; }            /* WhatsApp green */
+    .fb { background:#1877F2; }            /* Facebook blue */
+    .tw { background:#1DA1F2; }            /* X / Twitter blue */
+    .copy { background:#333; }             /* copy black */
+    .small-note { color:#555; font-size:0.9rem; margin-top:14px; }
+    a.share-link { color: inherit; text-decoration: none; display:inline-flex; align-items:center; gap:8px; }
+  </style>
+</head>
+<body class="bg-gray-50" style="font-family:Arial, Helvetica, sans-serif;">
+
+  <div class="share-container">
+    <h1 style="margin:0 0 8px">Share this voting link</h1>
+    <p style="margin:0 0 18px; color:#444">Tap a button below to share the site with friends.</p>
+
+    <!-- Replace window.location.origin in JS will be used to get live URL -->
+    <div id="siteLink" class="site-link"></div>
+
+    <div class="share-row" style="margin-top:10px">
+      <!-- WhatsApp -->
+      <button id="whatsappBtn" class="share-btn wa" title="Share on WhatsApp">
+        <span>WhatsApp</span>
+      </button>
+
+      <!-- Facebook -->
+      <button id="facebookBtn" class="share-btn fb" title="Share on Facebook">
+        <span>Facebook</span>
+      </button>
+
+      <!-- X / Twitter -->
+      <button id="twitterBtn" class="share-btn tw" title="Share on X (Twitter)">
+        <span>X / Twitter</span>
+      </button>
+
+      <!-- Copy link -->
+      <button id="copyBtn" class="share-btn copy" title="Copy link">
+        <span>Copy Link</span>
+      </button>
+    </div>
+
+    <div class="small-note">
+      Tip: On Instagram you can paste this link in your bio or add it to a story (if you have link/sticker access).
+    </div>
+  </div>
+
+  <script>
+    // Get the site link to share (use the current origin + optional path)
+    const siteLink = window.location.origin; // if your voting page is at root, good. Change if needed.
+    document.getElementById('siteLink').textContent = siteLink;
+
+    // Buttons
+    const whatsappBtn = document.getElementById('whatsappBtn');
+    const facebookBtn = document.getElementById('facebookBtn');
+    const twitterBtn = document.getElementById('twitterBtn');
+    const copyBtn = document.getElementById('copyBtn');
+
+    // Helper: show toast
+    function showToast(msg) {
+      const toast = document.createElement('div');
+      toast.className = 'toast-message';
+      toast.textContent = msg;
+      document.body.appendChild(toast);
+      setTimeout(()=> toast.classList.add('show'), 10);
+      setTimeout(()=> { toast.classList.remove('show'); setTimeout(()=> toast.remove(), 500); }, 2500);
+    }
+
+    // WhatsApp share (opens web/phone WhatsApp with prefilled text)
+    whatsappBtn.addEventListener('click', () => {
+      const text = encodeURIComponent("Vote here: " + siteLink);
+      const url = `https://wa.me/?text=${text}`;
+      window.open(url, '_blank');
+    });
+
+    // Facebook share (opens share dialog)
+    facebookBtn.addEventListener('click', () => {
+      const url = encodeURIComponent(siteLink);
+      const fb = `https://www.facebook.com/sharer/sharer.php?u=${url}`;
+      window.open(fb, '_blank', 'noopener');
+    });
+
+    // Twitter / X share (prefilled tweet)
+    twitterBtn.addEventListener('click', () => {
+      const text = encodeURIComponent("Vote here!");
+      const url = encodeURIComponent(siteLink);
+      const tw = `https://twitter.com/intent/tweet?text=${text}&url=${url}`;
+      window.open(tw, '_blank', 'noopener');
+    });
+
+    // Copy link (clipboard API + fallback + toast)
+    copyBtn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(siteLink);
+        showToast("✅ Link copied!");
+      } catch (err) {
+        // fallback for older browsers
+        const input = document.createElement('input');
+        input.value = siteLink;
+        document.body.appendChild(input);
+        input.select();
+        input.setSelectionRange(0, 99999); // mobile
+        try { document.execCommand('copy'); showToast("✅ Link copied!"); } catch(e) { prompt("Copy this link:", siteLink); }
+        input.remove();
+      }
+    });
+  </script>
+</body>
+</html>
+
+/*<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Share this Vote</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
     .share-container {
       max-width: 720px;
       margin: 40px auto;
@@ -190,4 +330,4 @@
     });
   </script>
 </body>
-</html>
+</html>*/
