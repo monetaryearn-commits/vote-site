@@ -1,6 +1,7 @@
 // results.js
 import { db, dbRef, get } from "./firebase.js";
 
+// --- Candidate details ---
 const images = [
   { id: "1", src: "https://i.imgur.com/KyJZtHX.jpg", name: "TVK" },
   { id: "2", src: "https://i.imgur.com/enzBSYA.jpg", name: "DMK" },
@@ -10,19 +11,24 @@ const images = [
   { id: "6", src: "https://i.imgur.com/7cjHmIJ.jpg", name: "DMDK" },
 ];
 
+// --- Initialize ---
 document.addEventListener("DOMContentLoaded", async () => {
   const resultsGrid = document.getElementById("results-grid");
   const shareBtn = document.getElementById("shareBtn");
   const copyBtn = document.getElementById("copyBtn");
 
+  // Load initial results
   await loadResults(resultsGrid);
 
-  // --- SHARE RESULTS ---
+  // ================================
+  // SHARE RESULTS BUTTON
+  // ================================
   if (shareBtn) {
     shareBtn.addEventListener("click", async () => {
       const data = await fetchResults();
       const total = Object.values(data).reduce((sum, obj) => sum + (obj.count || 0), 0);
 
+      // Create popup overlay
       const popup = document.createElement("div");
       popup.className = "popup-overlay";
       popup.innerHTML = `
@@ -43,46 +49,73 @@ document.addEventListener("DOMContentLoaded", async () => {
               `;
             })
             .join("")}
-          <button id="popupClose">Close</button>
-          <button id="popupShare">Share Results</button>
+          <div class="popup-buttons">
+            <button id="popupShare">Share Results</button>
+            <button id="popupClose">Close</button>
+          </div>
         </div>
       `;
       document.body.appendChild(popup);
 
+      // Close button handler
       document.getElementById("popupClose").onclick = () => popup.remove();
 
+      // Share results handler
       document.getElementById("popupShare").onclick = async () => {
         const link = window.location.origin;
-        const shareText = `📊 Live voting results — see who’s leading! Vote here 👉 ${link}`;
+        const shareText = `📊 Check out live voting results — see who’s leading! Vote here 👉 ${link}`;
         try {
           if (navigator.share) {
             await navigator.share({ title: "Voting Results", text: shareText, url: link });
           } else {
             await navigator.clipboard.writeText(link);
-            showToast("✅ Link copied! Share it anywhere.");
+            showToast("✅ Link copied! Share it on WhatsApp, Instagram, or anywhere.");
           }
         } catch (err) {
           console.error("Share failed:", err);
+          showToast("⚠️ Unable to share — please copy the link manually.");
         }
       };
     });
   }
 
-  // --- OPEN LINK BUTTON ---
+  // ================================
+  // OPEN LINK BUTTON
+  // ================================
   if (copyBtn) {
     copyBtn.addEventListener("click", async () => {
       const link = window.location.origin;
       try {
         await navigator.clipboard.writeText(link);
         showToast("✅ Link copied!");
-      } catch {
-        prompt("Copy this link manually:", link);
+      } catch (err) {
+        console.warn("Clipboard failed, using fallback:", err);
+
+        // fallback (older browsers)
+        const tempInput = document.createElement("input");
+        tempInput.value = link;
+        document.body.appendChild(tempInput);
+        tempInput.select();
+        document.execCommand("copy");
+        tempInput.remove();
+
+        showToast("✅ Link copied!");
       }
     });
   }
 });
 
-// --- Load results ---
+// ================================
+// FUNCTIONS
+// ================================
+
+// Fetch vote results from Firebase
+async function fetchResults() {
+  const snapshot = await get(dbRef(db, "votes"));
+  return snapshot.val() || {};
+}
+
+// Load and render results on the main results page
 async function loadResults(resultsGrid) {
   const data = await fetchResults();
   let total = 0;
@@ -106,18 +139,19 @@ async function loadResults(resultsGrid) {
   });
 }
 
-async function fetchResults() {
-  const snapshot = await get(dbRef(db, "votes"));
-  return snapshot.val() || {};
-}
-
-// --- Toast Notification Function ---
+// ================================
+// TOAST MESSAGE (Black Popup)
+// ================================
 function showToast(message) {
   const toast = document.createElement("div");
   toast.className = "toast-message";
   toast.textContent = message;
   document.body.appendChild(toast);
+
+  // Trigger fade-in
   setTimeout(() => toast.classList.add("show"), 10);
+
+  // Fade out after 2.5s
   setTimeout(() => {
     toast.classList.remove("show");
     setTimeout(() => toast.remove(), 500);
