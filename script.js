@@ -9,85 +9,87 @@ const images = [
   { id: "6", src: "https://i.imgur.com/7cjHmIJ.jpg", name: "DMDK" },
 ];
 
-const imageGrid = document.getElementById("image-grid");
-const voted = localStorage.getItem("votedFor");
+// Wait until DOM is fully loaded
+document.addEventListener("DOMContentLoaded", () => {
+  const imageGrid = document.getElementById("image-grid");
+  const voted = localStorage.getItem("votedFor");
 
-// --- Display Voting Images ---
-images.forEach((img) => {
-  const wrapper = document.createElement("div");
-  wrapper.className = "relative";
-
-  const el = document.createElement("img");
-  el.src = img.src;
-  el.alt = img.name;
-  el.className =
-    "w-full rounded-lg shadow-md cursor-pointer transition-transform hover:scale-105";
-
-  const label = document.createElement("div");
-  label.className = "text-sm text-center mt-2 font-semibold";
-  label.textContent = img.name;
-
-  // Voting click action
-  el.onclick = async () => {
-    if (voted) {
-      alert("You already voted for: " + voted);
-      return;
-    }
-    const voteRef = dbRef(db, "votes/" + img.id + "/count");
-    await runTransaction(voteRef, (current) => (current || 0) + 1);
-    localStorage.setItem("votedFor", img.name);
-    alert("Thank you for voting! ✅");
-    updateLiveResults(); // refresh live results immediately
-  };
-
-  wrapper.appendChild(el);
-  wrapper.appendChild(label);
-  imageGrid.appendChild(wrapper);
-});
-
-// --- LIVE RESULTS ---
-const liveResultsDiv = document.getElementById("live-results");
-
-async function updateLiveResults() {
-  try {
-    const snapshot = await get(dbRef(db, "votes"));
-    const data = snapshot.val() || {};
-
-    // Map and sort by count descending
-    const ranked = images
-      .map((img) => ({
-        ...img,
-        count: data[img.id]?.count || 0,
-      }))
-      .sort((a, b) => b.count - a.count);
-
-    // Clear previous results
-    liveResultsDiv.innerHTML = "";
-
-    // Display each row with rank
-    ranked.forEach((party, index) => {
-      const row = document.createElement("div");
-      row.className = "result-row";
-
-      row.innerHTML = `
-        <div class="rank-num">${index + 1}</div>
-        <img src="${party.src}" class="small-img" />
-        <div class="result-text">
-          <strong>${party.name}</strong> • ${party.count} votes
-        </div>
-      `;
-      liveResultsDiv.appendChild(row);
-    });
-  } catch (err) {
-    console.error("Error fetching live results:", err);
-    liveResultsDiv.innerHTML =
-      "<div class='text-red-500'>Error loading results. Please refresh.</div>";
+  if (!imageGrid) {
+    console.error("No element with id 'image-grid' found!");
+    return;
   }
-}
 
-// Initial load + refresh every 6 seconds
-updateLiveResults();
-setInterval(updateLiveResults, 6000);
+  // Display each image with label
+  images.forEach((img) => {
+    const wrapper = document.createElement("div");
+    wrapper.className = "relative";
+
+    const el = document.createElement("img");
+    el.src = img.src;
+    el.alt = img.name;
+    el.className =
+      "w-full rounded-lg shadow-md cursor-pointer transition-transform hover:scale-105";
+
+    const label = document.createElement("div");
+    label.className = "text-sm text-center mt-2 font-semibold";
+    label.textContent = img.name;
+
+    // Voting click action
+    el.onclick = async () => {
+      if (voted) {
+        alert("You already voted for: " + voted);
+        return;
+      }
+      const voteRef = dbRef(db, "votes/" + img.id + "/count");
+      await runTransaction(voteRef, (current) => (current || 0) + 1);
+      localStorage.setItem("votedFor", img.name);
+      alert("✅ Thank you for voting!");
+      updateLiveResults(); // refresh results
+    };
+
+    wrapper.appendChild(el);
+    wrapper.appendChild(label);
+    imageGrid.appendChild(wrapper);
+  });
+
+  // --- LIVE RESULTS ---
+  const liveResultsDiv = document.getElementById("live-results");
+
+  async function updateLiveResults() {
+    if (!liveResultsDiv) return;
+
+    try {
+      const snapshot = await get(dbRef(db, "votes"));
+      const data = snapshot.val() || {};
+
+      const ranked = images
+        .map((img) => ({ ...img, count: data[img.id]?.count || 0 }))
+        .sort((a, b) => b.count - a.count);
+
+      liveResultsDiv.innerHTML = "";
+
+      ranked.forEach((party, index) => {
+        const row = document.createElement("div");
+        row.className = "result-row";
+        row.innerHTML = `
+          <div class="rank-num">${index + 1}</div>
+          <img src="${party.src}" class="small-img" />
+          <div class="result-text">
+            <strong>${party.name}</strong> • ${party.count} votes
+          </div>
+        `;
+        liveResultsDiv.appendChild(row);
+      });
+    } catch (err) {
+      console.error("Error fetching live results:", err);
+      liveResultsDiv.innerHTML =
+        "<div class='text-red-500'>Error loading results. Please refresh.</div>";
+    }
+  }
+
+  updateLiveResults();
+  setInterval(updateLiveResults, 6000);
+});
 
 /*// script.js
 import { db, dbRef, runTransaction } from "./firebase.js";
